@@ -18,8 +18,8 @@ const PowerSlider: FC<PowerSliderProps> = ({initialPower, powerState}) => {
     const [sliderPower, setSliderPower] = useState(defaultPower);
     
 
-    const handleCheckboxChange = (event: ChangeEvent<HTMLInputElement>, checked: boolean) => setPower(checked ? sliderPower : -1);
-    const handleSliderChange = (event: Event, newValue: number | number[]) => {
+    const handleCheckboxChange = (_: ChangeEvent<HTMLInputElement>, checked: boolean) => setPower(checked ? sliderPower : -1);
+    const handleSliderChange = (_: Event, newValue: number | number[]) => {
         if (typeof newValue === 'number') {
             setPower(newValue);
             setSliderPower(newValue);
