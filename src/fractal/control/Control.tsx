@@ -1,15 +1,14 @@
 import { useState,  FC, Dispatch, SetStateAction} from 'react';
 import { vec3, mat4 } from 'gl-matrix';
-import {fractalDE} from '../kernel';
 
 interface ControlProps {
-    powers: [number, number, number];
+    fractalDE: (p: vec3) => number;
     setCamera:  Dispatch<SetStateAction<vec3>>;
     setEps: Dispatch<SetStateAction<number>>;
 }
 const rotateFactor = 0.005;
-const translateFactor = 0.02;
-const Control: FC<ControlProps> = ({powers, setCamera, setEps}) => {
+const translateFactor = 0.2//0.02;
+const Control: FC<ControlProps> = ({fractalDE, setCamera, setEps}) => {
     const [evtButton, setEvtButton] = useState(-1);
     return (
         <div 
@@ -28,7 +27,7 @@ const Control: FC<ControlProps> = ({powers, setCamera, setEps}) => {
             onMouseMove={(e) => {
                 if(evtButton === 0){
                     if( e.movementX === 0 &&  e.movementY === 0) return;
-                    const screenRotateAxis = [e.movementY, -e.movementX];
+                    const screenRotateAxis = [-e.movementY, -e.movementX];
                     const r = Math.sqrt(e.movementX * e.movementX + e.movementY * e.movementY);
                     setCamera(prev => {
                         const newCamera = vec3.create();
@@ -58,7 +57,7 @@ const Control: FC<ControlProps> = ({powers, setCamera, setEps}) => {
             onWheel={(e) => {
                 if(evtButton === -1){
                     setCamera(prev => {
-                        const DE = fractalDE([prev[0], prev[1], prev[2]], powers)[0];
+                        const DE = fractalDE(prev);
                         
                         const newCamera = vec3.create();
                         const translate = vec3.create();

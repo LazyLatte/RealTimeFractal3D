@@ -1,9 +1,9 @@
-import Mandelbulb from './mandelbulb';
+import Fractal from './fractal';
 import './App.css'
 
 function App() {
   return (
-    <Mandelbulb/>
+    <Fractal/>
   )
 }
 

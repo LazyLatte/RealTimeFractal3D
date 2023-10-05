@@ -1,19 +1,12 @@
-import { useState, FC, Dispatch, SetStateAction} from 'react';
+import { useState, FC, ReactNode} from 'react';
 import Drawer from '@mui/material/Drawer';
 import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
 import SettingsIcon from '@mui/icons-material/Settings';
 import Header from './header';
-import Body from './body';
-import { RGBColor } from 'react-color';
 
-interface SettingProps {
-  color: RGBColor;
-  setColor:  Dispatch<SetStateAction<RGBColor>>;
-  powerStates: [number, Dispatch<SetStateAction<number>>][]
-}
-
-const Setting: FC<SettingProps> = (props) => {
+interface SettingProps {children: ReactNode}
+const Setting: FC<SettingProps> = ({children}) => {
   const [open, setOpen] = useState(false);
   const handleOpenDrawer = () => setOpen(true);
   const handleDrawerClose = () => setOpen(false);
@@ -30,14 +23,13 @@ const Setting: FC<SettingProps> = (props) => {
         }}
         PaperProps={{
           sx: {
-            height: 720,
             backgroundColor: '#eee'
           }
         }}
       >
         <Header onClick={handleDrawerClose}/>
         <Divider/>
-        <Body {...props}/>
+        {children}
       </Drawer>
       <IconButton 
         aria-label="setting" 
