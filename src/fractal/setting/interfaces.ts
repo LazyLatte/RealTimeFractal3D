@@ -1,4 +1,4 @@
-export enum Fractal {MandelBulb, MandelBox};
+export enum Fractal {MandelBulb, MandelBox, Menger, Sierpinski};
 export interface Param {
     label: string;
     minValue: number;

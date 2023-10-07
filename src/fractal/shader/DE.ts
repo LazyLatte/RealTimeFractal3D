@@ -1,4 +1,6 @@
 import { vec3 } from "gl-matrix";
+import { Fractal } from "../setting";
+const {MandelBulb, MandelBox, Menger, Sierpinski} = Fractal;
 const mandelbulbDE = `
     vec2 mandelbulbDE(vec3 p) {
         const int iter = 9;
@@ -30,7 +32,7 @@ const mandelbulbDE = `
 const mandelboxDE = `
     vec2 mandelboxDE(vec3 p) {
         const int iter = 8;
-        const float bailout2 = 1024.0;
+        const float bailout2 = 256.0;
         float scale = params[0];
         float minRadius2 = params[1] * params[1];
         float fixedRadius2 = params[2] * params[2];
@@ -60,17 +62,72 @@ const mandelboxDE = `
             trap = min(trap, r2);
             if(r2 > bailout2) break;
         }
-        return vec2(sqrt(r2) / abs(dr), trap);
+        return vec2(sqrt(r2) / abs(dr), sqrt(trap));
+    }
+`
+const mengerDE = `
+
+    float sdBox(vec3 p, vec3 b){
+        vec3 d = abs(p) - b;
+        return length(max(d,0.0)) + min(max(d.x,max(d.y,d.z)),0.0);
+    }
+    vec2 mengerDE(vec3 p){
+        const int iter = 3;
+        const vec3 n1 = normalize(vec3(1,0,-1));
+        const vec3 n2 = normalize(vec3(0,1,-1));
+        vec3 v = p;
+        float s = 1.;
+        float trap = dot(v,v);
+        for(int i=0; i<iter; i++){
+            v = abs(v);  
+            v -= 2.*min(0.,dot(v,n1))*n1; 
+            v -= 2.*min(0.,dot(v,n2))*n2; 
+            
+            v *= 3.; 
+            s /= 3.;
+            
+            v.z -=  1.;
+            v.z  = -abs(v.z);
+            v.z +=  1.;
+            v.x -= 2.;
+            v.y -= 2.;  
+            
+            trap = min(trap, dot(v,v)); 
+        }
+        float dis = sdBox(v,vec3(1.0));
+        dis *= s;
+        return vec2(dis, sqrt(trap));
     }
 `
 
+const sierpinskiDE = `
+    vec2 sierpinskiDE(vec3 p){
+        const int iter = 15;
+        float scale = 2.0;
+        vec3 offset = vec3(1.0);
 
+        vec3 v = p;
+        float trap = dot(v, v);
+        for(int i=0; i<iter; i++){
+            if(v.x+v.y<0.0) v.xy = -v.yx; 
+            if(v.x+v.z<0.0) v.xz = -v.zx;
+            if(v.y+v.z<0.0) v.yz = -v.zy; 
+            v = v*scale - offset*(scale-1.0);
+            trap = min(dot(v, v), trap);
+        }
+        return vec2(length(v)* pow(scale, -float(iter)), sqrt(trap));
+    }
+`
 const fractalDE = `
     ${mandelbulbDE}
     ${mandelboxDE}
+    ${mengerDE}
+    ${sierpinskiDE}
     vec2 fractalDE(vec3 p) {
-        if(fractal == 0) return mandelbulbDE(p);
-        if(fractal == 1) return mandelboxDE(p);
+        if(fractal == ${MandelBulb}) return mandelbulbDE(p);
+        if(fractal == ${MandelBox}) return mandelboxDE(p);
+        if(fractal == ${Menger}) return mengerDE(p);
+        if(fractal == ${Sierpinski}) return sierpinskiDE(p);
         return vec2(0.0);
     }
 `
@@ -138,9 +195,32 @@ const mandelboxDE_JS = (p: vec3, params: vec3, juliaEnabled: boolean, julia: vec
     return Math.sqrt(r2) / Math.abs(dr);
 }
 
+const sierpinskiDE_JS = (p: vec3): number => {
+    const iter = 15;
+    const scale = 2.0;
+    const offset = vec3.fromValues(1.0, 1.0, 1.0);
+    vec3.scale(offset, offset, 1.0 - scale);
+    var v = vec3.clone(p);
+
+    const fold = (z: vec3, a: number, b: number) => {
+        const fold_z = vec3.clone(z);
+        fold_z[a] = -z[b];
+        fold_z[b] = -z[a];
+        return fold_z;
+    };
+    
+    for(let i=0; i<iter; i++){
+        if(v[0]+v[1]<0.0) v = fold(v, 0, 1); 
+        if(v[0]+v[2]<0.0) v = fold(v, 0, 2);
+        if(v[1]+v[2]<0.0) v = fold(v, 1, 2); 
+        vec3.scaleAndAdd(v, offset, v, scale);
+    }
+    return vec3.length(v)* Math.pow(scale, -iter);
+}
 export const fractalDE_JS = (fractal: number, p: vec3, params: vec3, juliaEnabled: boolean, julia: vec3): number => {
-    if(fractal === 0) return mandelbulbDE_JS(p, params[0], juliaEnabled, julia);
-    if(fractal === 1) return mandelboxDE_JS(p, params, juliaEnabled, julia);
+    if(fractal === MandelBulb) return mandelbulbDE_JS(p, params[0], juliaEnabled, julia);
+    if(fractal === MandelBox) return mandelboxDE_JS(p, params, juliaEnabled, julia);
+    if(fractal === Sierpinski) return sierpinskiDE_JS(p);
     return 0;
 }
 
