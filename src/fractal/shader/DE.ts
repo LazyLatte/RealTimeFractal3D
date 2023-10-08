@@ -1,6 +1,6 @@
 import { vec3 } from "gl-matrix";
 import { Fractal } from "../setting";
-const {MandelBulb, MandelBox, Menger, Sierpinski} = Fractal;
+const {MandelBulb, MandelBox, Menger, Sierpinski, Julia4D} = Fractal;
 const mandelbulbDE = `
     vec2 mandelbulbDE(vec3 p) {
         const int iter = 9;
@@ -19,7 +19,7 @@ const mandelbulbDE = `
             float phi = asin(v.z / r) * power;
             dr = power * r_pow_n_minus_one * dr + 1.0;
             v = c + r_pow_n * vec3(cos(theta) * cos(phi), cos(phi) * sin(theta), -sin(phi));
-    
+
             trap = min(trap, r);
             r = length(v);     
             if (r > bailout) break;  
@@ -31,21 +31,22 @@ const mandelbulbDE = `
 
 const mandelboxDE = `
     vec2 mandelboxDE(vec3 p) {
-        const int iter = 8;
-        const float bailout2 = 256.0;
+        const int iter = 64;
+        const float bailout2 = 1024.0;
         float scale = params[0];
         float minRadius2 = params[1] * params[1];
-        float fixedRadius2 = params[2] * params[2];
+        float fixedRadius2 = 1.0;
+        float fold = params[2];
         
         vec3 c = juliaEnabled ? julia : p;
         vec3 v = p;
         float dr = 1.0;
         float r2 = v.x * v.x + v.y * v.y + v.z * v.z;  
         float trap = r2;
-
+        if(abs(scale) < 1.0) return vec2(0.0, 0.0);
         for(int i=0; i<iter; i++){
             v = clamp(v, -1.0, 1.0) * 2.0 - v;
-
+            v *= fold;
             r2 = v.x * v.x + v.y * v.y + v.z * v.z;
             if(r2 < minRadius2){
                 float factor = fixedRadius2 / minRadius2;
@@ -66,7 +67,6 @@ const mandelboxDE = `
     }
 `
 const mengerDE = `
-
     float sdBox(vec3 p, vec3 b){
         vec3 d = abs(p) - b;
         return length(max(d,0.0)) + min(max(d.x,max(d.y,d.z)),0.0);
@@ -102,7 +102,7 @@ const mengerDE = `
 
 const sierpinskiDE = `
     vec2 sierpinskiDE(vec3 p){
-        const int iter = 15;
+        const int iter = 8;
         float scale = 2.0;
         vec3 offset = vec3(1.0);
 
@@ -118,16 +118,96 @@ const sierpinskiDE = `
         return vec2(length(v)* pow(scale, -float(iter)), sqrt(trap));
     }
 `
+
+const julia4DDE = `
+    vec3 qMul(vec3 q1, vec3 q2){return vec3(q1.x*q2.x - q1.y*q2.y - q1.z*q2.z, q1.x*q2.y + q2.x*q1.y, q1.x*q2.z + q2.x*q1.z);}
+    vec3 qSquare(vec3 q){return vec3(q.x * q.x - q.y * q.y - q.z * q.z, 2.0 * q.x * q.yz);}
+    vec3 qCube(vec3 q){vec3 q2 = q * q; return vec3(q.x * (q2.x - 3.0 * q2.y - 3.0 * q2.z), q.yz * (3.0 * q2.x - q2.y - q2.z));}
+    vec3 qFourthPow(vec3 q){return qSquare(qSquare(q));}
+    vec3 qFifthPow(vec3 q){return qMul(qSquare(q), qCube(q));}
+    vec3 qSixthPow(vec3 q){return qSquare(qCube(q));}
+    vec3 qSeventhPow(vec3 q){return qMul(qCube(q), qFourthPow(q));}
+    vec3 qEighthPow(vec3 q){return qSquare(qSquare(qSquare(q)));}
+    vec3 qNinthPow(vec3 q){return qCube(qCube(q));}
+    vec3 qPow(vec3 q, float power){
+        if(power == 2.0) return qSquare(q);
+        if(power == 3.0) return qCube(q);
+        if(power == 4.0) return qFourthPow(q);
+        if(power == 5.0) return qFifthPow(q);
+        if(power == 6.0) return qSixthPow(q);
+        if(power == 7.0) return qSeventhPow(q);
+        if(power == 8.0) return qEighthPow(q);
+        if(power == 9.0) return qNinthPow(q);
+        return q;
+    }
+    vec2 julia4DDE(vec3 p) {
+        const int iter = 24;
+        const float bailout = 256.0;
+        float power = params[0];
+        vec3 c = juliaEnabled ? julia : p;
+        vec3 v = p;
+        float dr2 = 1.0;             
+        float r2 = dot(v, v);  
+        float trap = r2;
+        for (int i = 0; i < iter; i++) {
+            dr2 *= (pow(power, 2.0) * pow(r2, power - 1.0));
+            v = qPow(v, power) + c;
+            
+            r2 = dot(v, v);
+            trap = min(trap, r2);
+            if(r2 > bailout) break;
+        }
+        return vec2(0.25 * log(r2) * sqrt(r2 / dr2), sqrt(trap));
+    }
+`
+const rotate = `
+    vec3 rotateX(vec3 v, float deg){
+        float rad = deg * PI / 180.0;
+        float c = cos(rad);
+        float s = sin(rad);
+        mat3 rotateMatrix = mat3(
+            vec3(1, 0, 0),
+            vec3(0, c, -s),
+            vec3(0, s, c)
+        );
+        return rotateMatrix * v;
+    }
+    vec3 rotateY(vec3 v, float deg){
+        float rad = deg * PI / 180.0;
+        float c = cos(rad);
+        float s = sin(rad);
+        mat3 rotateMatrix = mat3(
+            vec3(c, 0, s),
+            vec3(0, 1, 0),
+            vec3(-s, 0, c)
+        );
+        return rotateMatrix * v;
+    }
+    vec3 rotateZ(vec3 v, float deg){
+        float rad = deg * PI / 180.0;
+        float c = cos(rad);
+        float s = sin(rad);
+        mat3 rotateMatrix = mat3(
+            vec3(c, -s, 0),
+            vec3(s, c, 0),
+            vec3(0, 0, 1)
+        );
+        return rotateMatrix * v;
+    }
+`
 const fractalDE = `
+    ${rotate}
     ${mandelbulbDE}
     ${mandelboxDE}
     ${mengerDE}
     ${sierpinskiDE}
+    ${julia4DDE}
     vec2 fractalDE(vec3 p) {
         if(fractal == ${MandelBulb}) return mandelbulbDE(p);
         if(fractal == ${MandelBox}) return mandelboxDE(p);
         if(fractal == ${Menger}) return mengerDE(p);
         if(fractal == ${Sierpinski}) return sierpinskiDE(p);
+        if(fractal == ${Julia4D}) return julia4DDE(p);
         return vec2(0.0);
     }
 `
@@ -162,7 +242,8 @@ const mandelboxDE_JS = (p: vec3, params: vec3, juliaEnabled: boolean, julia: vec
     const bailout2 = 1024; 
     const scale = params[0];
     const minRadius2 = params[1] * params[1];
-    const fixedRadius2 = params[2] * params[2];
+    const fixedRadius2 = 1.0;
+    const fold = params[2];
 
     const c = juliaEnabled ? vec3.clone(julia) : vec3.clone(p);
     var v = vec3.clone(p);
@@ -173,7 +254,7 @@ const mandelboxDE_JS = (p: vec3, params: vec3, juliaEnabled: boolean, julia: vec
         if(v[0] > 1){v[0] = 2 - v[0]}else if(v[0] < -1){v[0] = -2 - v[0]}
         if(v[1] > 1){v[1] = 2 - v[1]}else if(v[1] < -1){v[1] = -2 - v[1]}
         if(v[2] > 1){v[2] = 2 - v[2]}else if(v[2] < -1){v[2] = -2 - v[2]}
-
+        vec3.scale(v, v, fold);
         r2 = v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
         if(r2 < minRadius2){
             const temp = fixedRadius2 / minRadius2;

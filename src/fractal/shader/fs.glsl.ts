@@ -57,7 +57,7 @@ const fs = `
             vec3 specular = diffuse * pow(dot(H, N), gloss);
             
             color = palette(orbit - 0.4, palette_seed);
-            color = 0.01 / color;
+            //color = 0.01 / color;
 
             lin += ambient;
             lin += diffuse;

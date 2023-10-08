@@ -3,14 +3,13 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Slider from '@mui/material/Slider';
 import { Param } from '..';
-const paramStep = 0.1;
 const marks = [...Array(5).keys()].map((_, i) => ({label: 1 << i, value: 1 << i}));
 interface ParamSliderProps {
     param: Param;
     setParam: (value: number) => void;
 }
 const ParamSlider: FC<ParamSliderProps> = ({param, setParam}) => {
-    const {label, minValue, maxValue, value} = param;
+    const {label, minValue, maxValue, step, value} = param;
     const handleSliderChange = (_: Event, newValue: number | number[]) => {
         if (typeof newValue === 'number') {
             setParam(newValue)
@@ -25,7 +24,7 @@ const ParamSlider: FC<ParamSliderProps> = ({param, setParam}) => {
             <Slider
                 min={minValue}
                 max={maxValue}
-                step={paramStep}
+                step={step}
                 value={value}
                 onChange={handleSliderChange}
                 valueLabelDisplay="auto"

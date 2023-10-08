@@ -46,9 +46,10 @@ const defaultMandelBulbSetting: SettingState = {
         label: 'power',
         minValue: 0,
         maxValue: 16,
+        step: 0.1,
         value: 8
     }],
-    julia: [false, [0, 0, 0]],
+    julia: [false, [1, 0, 0]],
     color: {
         r: 25,
         g: 94,
@@ -64,16 +65,19 @@ const defaultMandelBoxSetting: SettingState = {
         label: 'scale',
         minValue: -3,
         maxValue: 3,
-        value: 3
+        step: 0.1,
+        value: -1.7
     }, {
-        label: 'min radius',
+        label: 'minR',
         minValue: 0,
-        maxValue: 2,
+        maxValue: 1,
+        step: 0.1,
         value: 0.5
     }, {
-        label: 'fixed radius',
+        label: 'fold',
         minValue: 0,
         maxValue: 2,
+        step: 0.1,
         value: 1
     }],
     julia: [false, [0, 0, 0]],
@@ -112,15 +116,32 @@ const defaultSierpinskiSetting: SettingState = {
     eps: 0.01
 }
 
+const defaultJulia4DSetting: SettingState = {
+    fractal: Fractal.Julia4D,
+    params: [{
+        label: 'power',
+        minValue: 2,
+        maxValue: 9,
+        step: 1,
+        value: 2
+    }],
+    julia: [true, [-0.8, -0.4, 0]],
+    color: {
+        r: 25,
+        g: 94,
+        b: 124
+    },
+    camera: vec3.fromValues(-1, 1.5, 0),
+    eps: 0.0015
+}
 
-
-const defaultSetting = [defaultMandelBulbSetting, defaultMandelBoxSetting, defaultMengerSetting, defaultSierpinskiSetting];
+const defaultSetting = [defaultMandelBulbSetting, defaultMandelBoxSetting, defaultMengerSetting, defaultSierpinskiSetting, defaultJulia4DSetting];
 const getSetting = (fractal: Fractal): SettingState  => {
     const targetsetting = defaultSetting[fractal];
     return {
         fractal,
         params: targetsetting.params.map(e => ({...e})),
-        julia: [false, [0, 0, 0]],
+        julia: [targetsetting.julia[0], [targetsetting.julia[1][0], targetsetting.julia[1][1], targetsetting.julia[1][2]]],
         color: {...targetsetting.color},
         camera: vec3.clone(targetsetting.camera),
         eps: targetsetting.eps
