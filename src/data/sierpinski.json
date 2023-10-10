@@ -10,5 +10,6 @@
     "neon": false,
     "camera": [1.5, 1.5, -1.5],
     "eps": 0.01,
-    "ray_multiplier": 0.5
+    "ray_multiplier": 0.5,
+    "far_plane": 4.0
 }

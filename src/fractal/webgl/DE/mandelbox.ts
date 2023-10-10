@@ -36,7 +36,7 @@ export const mandelboxDE = `
         return vec2(sqrt(r2) / abs(dr), sqrt(trap));
     }
 `
-export const mandelboxDE_JS = (p: vec3, params: vec3, juliaEnabled: boolean, julia: vec3): number => {
+export const mandelboxDE_JS = (p: vec3, params: number[], juliaEnabled: boolean, julia: vec3): number => {
     const iter = 8;
     const bailout2 = 1024; 
     const scale = params[0];

@@ -5,5 +5,6 @@ export interface Param {
     minValue: number;
     maxValue: number;
     step: number;
+    marks: number[];
     value: number;
 }

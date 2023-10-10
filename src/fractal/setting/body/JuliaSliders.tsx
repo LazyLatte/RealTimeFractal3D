@@ -8,8 +8,8 @@ interface JuliaSlidersProps {
     juliaEnabled: boolean;
     setJulia: (j: number, idx: number) => void;
 }
-const j_min = -10;
-const j_max = 10;
+const j_min = -8;
+const j_max = 8;
 const j_step = 0.1;
 const JuliaSliders: FC<JuliaSlidersProps> = ({juliaEnabled, julia, setJulia}) => {
     const labels = ['Jx', 'Jy', 'Jz'] as const;

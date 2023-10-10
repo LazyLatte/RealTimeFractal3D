@@ -1,10 +1,11 @@
 import fractalDE from "../DE";
 import shadingFunctions from "../shading";
 export const fs = `
+    #define MAX_PARAM_NUM 10
     precision mediump float;
     uniform vec2 iResolution;
     uniform int fractal;
-    uniform vec3 params;
+    uniform float params[MAX_PARAM_NUM];
     uniform vec3 camera;
     uniform vec3 front;
     uniform bool juliaEnabled;
@@ -13,10 +14,10 @@ export const fs = `
     uniform bool neon;
     uniform float eps;
     uniform float ray_multiplier;
-    
+    uniform float far_plane;
+
     const int ray_step = 2000;
-    float FOV = 1.0;
-    float far_plane = 10.0;
+    float FOV = 1.5;
     float PI = 3.14159265;
     ${fractalDE}
     ${shadingFunctions}

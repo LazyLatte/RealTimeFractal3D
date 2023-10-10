@@ -3,11 +3,10 @@ import { Fractal } from "../../setting";
 import rotate from "./rotate";
 import {mandelbulbDE, mandelbulbDE_JS} from "./mandelbulb";
 import {mandelboxDE, mandelboxDE_JS} from "./mandelbox";
-import {mengerDE} from "./menger";
+import {mengerDE, mengerDE_JS} from "./menger";
 import {sierpinskiDE, sierpinskiDE_JS} from "./sierpinski";
 import {julia4DDE, julia4DDE_JS} from "./julia4D";
 const {MandelBulb, MandelBox, Menger, Sierpinski, Julia4D} = Fractal;
-
 
 const fractalDE = `
     ${rotate}
@@ -28,9 +27,10 @@ const fractalDE = `
 export default fractalDE;
 
 
-export const fractalDE_JS = (fractal: number, p: vec3, params: vec3, juliaEnabled: boolean, julia: vec3): number => {
+export const fractalDE_JS = (fractal: number, p: vec3, params: number[], juliaEnabled: boolean, julia: vec3): number => {
     if(fractal === MandelBulb) return mandelbulbDE_JS(p, params[0], juliaEnabled, julia);
     if(fractal === MandelBox) return mandelboxDE_JS(p, params, juliaEnabled, julia);
+    if(fractal === Menger) return mengerDE_JS(p);
     if(fractal === Sierpinski) return sierpinskiDE_JS(p);
     if(fractal === Julia4D) return julia4DDE_JS(p, params[0], juliaEnabled, julia);
     return 0;

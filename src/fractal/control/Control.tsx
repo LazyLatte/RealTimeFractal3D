@@ -23,7 +23,7 @@ const Control: FC<ControlProps> = ({dispatch}) => {
             onClick={() => setFreeCamera(prev => !prev)}
             onMouseMove={(e) => {
                 if(freeCamera){
-                    if( e.movementX === 0 && e.movementY === 0) return;
+                    if(e.movementX === 0 && e.movementY === 0) return;
                     dispatch({type: '@ROTATE_CAMERA', dir: [-e.movementY, -e.movementX]})
                 }
             }}

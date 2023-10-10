@@ -3,19 +3,14 @@ import Control from './control';
 import StateDisplay from './state-display';
 import Setting, {SettingContent, SettingFoot, useSettingReducer} from './setting';
 import useRender from './webgl';
-import { vec3 } from 'gl-matrix';
 const Fractal = () => {
   const render = useMemo(() => useRender(), []);
   const fractalRef = useRef<HTMLDivElement>(null);
-  
   const [state, dispatch] = useSettingReducer();
-  const {fractal, neon, color, juliaEnabled, julia, params, camera, front, eps, ray_multiplier} = state;
-  const paramValues = Array(3).fill(0).map((_, i) => i < params.length ? params[i].value : 0) as vec3; // pad to vec3
+  const {fractal, neon, color, juliaEnabled, julia, params, camera, front, eps, ray_multiplier, far_plane} = state;
 
   const draw = useCallback(() => {
-    const rgb = vec3.fromValues(color.r, color.g, color.b);
-    vec3.scale(rgb, rgb, 1 / 255);
-    const cvs = render(fractal, paramValues, camera, front, juliaEnabled, julia, neon, rgb, eps, ray_multiplier);
+    const cvs = render(fractal, params.map(e => e.value), camera, front, juliaEnabled, julia, neon, [color.r / 255, color.g / 255, color.b / 255], eps, ray_multiplier, far_plane);
     fractalRef.current?.append(cvs);
   }, [state])
   useEffect(() => {

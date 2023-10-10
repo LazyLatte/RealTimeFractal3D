@@ -18,6 +18,7 @@ export type SettingState = {
     front: vec3;
     eps: number;
     ray_multiplier: number;
+    far_plane: number;
 }
 
 export type SettingAction = {
@@ -61,14 +62,18 @@ export type SettingAction = {
 const defaultSetting = [DefaultMandelBulbSetting, DefaultMandelBoxSetting, DefaultMengerSetting, DefaultSierpinskiSetting, DefaultJulia4DSetting];
 const getSetting = (fractal: Fractal): SettingState  => {
     const targetsetting = defaultSetting[fractal];
-    const {params, juliaEnabled, neon, eps, ray_multiplier} = targetsetting;
+    const {params, juliaEnabled, neon, eps, ray_multiplier, far_plane} = targetsetting;
+    const julia = [targetsetting.julia[0], targetsetting.julia[1], targetsetting.julia[2]] as vec3;
     const color = {...targetsetting.color};
-    const julia = vec3.fromValues(targetsetting.julia[0], targetsetting.julia[1], targetsetting.julia[2]);
     const camera = vec3.fromValues(targetsetting.camera[0], targetsetting.camera[1], targetsetting.camera[2]);
     const front = vec3.create();
     vec3.normalize(front, vec3.scale(front, camera, -1));
-    return {fractal, juliaEnabled, julia, color, neon, camera, front, eps, ray_multiplier, params: params.map(e => ({...e}))}
+    return {fractal, juliaEnabled, julia, color, neon, camera, front, eps, ray_multiplier, far_plane, params: params.map(e => ({...e}))}
 }
+// handle context lost
+// find best default params
+// preservebuufer false
+// keep rotate even when mouse is on screen edge
 const reducer = (state: SettingState, action: SettingAction): SettingState => {
     switch(action.type){
         case '@SET_PARAM': {
@@ -88,8 +93,7 @@ const reducer = (state: SettingState, action: SettingAction): SettingState => {
         case '@MOVE_CAMERA': {
             const {dir} = action;
             const {fractal, params, juliaEnabled, julia, camera, front} = state;
-            const paramValues = Array(3).fill(0).map((_, i) => i < params.length ? params[i].value : 0) as vec3; // pad to vec3
-            const DE = fractalDE_JS(fractal, camera, paramValues, juliaEnabled, julia);
+            const DE = fractalDE_JS(fractal, camera, params.map(e => e.value), juliaEnabled, julia);
             const translateFactor = 0.2;
             const dist = Math.abs(DE) * translateFactor;
 
@@ -114,12 +118,12 @@ const reducer = (state: SettingState, action: SettingAction): SettingState => {
         }
         case '@ROTATE_CAMERA': {
             const {dir} = action;
+            const {front} = state;
             const r = vec2.length(dir);
-            const rotateFactor = 0.05;
-            const {fractal, params, juliaEnabled, julia, camera, front} = state;
-            const paramValues = Array(3).fill(0).map((_, i) => i < params.length ? params[i].value : 0) as vec3; // pad to vec3
-            const DE = fractalDE_JS(fractal, camera, paramValues, juliaEnabled, julia);
-            const theta = Math.min(Math.abs(DE), 0.04) * r * rotateFactor;
+            const rotateFactor = 0.0008;
+            const z_axis = [0, 0, dir[0] > 0 ? 1 : -1] as vec3;
+            const max_theta =  Math.acos(vec3.dot(front, z_axis) / vec3.length(front)) - 0.52359877559; //0.52359877559 = pi / 6
+            const theta = Math.min(r * rotateFactor, max_theta);
             const newFront = vec3.create();
                         
             const right = vec3.create();
@@ -136,12 +140,9 @@ const reducer = (state: SettingState, action: SettingAction): SettingState => {
             vec3.scaleAndAdd(rotateAxis, rotateAxis, right, dir[0]);
             vec3.scaleAndAdd(rotateAxis, rotateAxis, up, dir[1]);
             mat4.fromRotation(rotateMatrix, theta, rotateAxis);
-
             vec3.transformMat4(newFront, front, rotateMatrix);
-            return {
-                ...state,
-                front: newFront
-            };
+
+            return {...state, front: newFront};
         }
         case '@SET_EPS': {
             const {eps} = state;
@@ -165,4 +166,4 @@ const reducer = (state: SettingState, action: SettingAction): SettingState => {
     }
 }
 
-export const useSettingReducer = () => useReducer(reducer, getSetting(Fractal.MandelBulb));
+export const useSettingReducer = () => useReducer(reducer, getSetting(Fractal.Menger));

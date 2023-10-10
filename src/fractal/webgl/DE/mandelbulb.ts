@@ -22,7 +22,7 @@ export const mandelbulbDE = `
             r = length(v);     
             if (r > bailout) break;  
         }
-    
+        
         return vec2(0.5 * log(r) * r / dr, trap);
     }
 `
