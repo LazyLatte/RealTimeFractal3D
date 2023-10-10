@@ -1,8 +1,9 @@
 import { vec3 } from "gl-matrix";
-import vs from "./vs.glsl";
-import fs from "./fs.glsl";
+import {vs, fs} from "./shader";
 import { Fractal } from "../setting";
-//preserveDrawingBuffer
+
+
+
 function useRender() {
     const canvas = document.createElement("canvas");
     canvas.id = "fractal-canvas";
@@ -10,8 +11,10 @@ function useRender() {
     canvas.style.height = `${window.innerHeight}px`;
     canvas.width = Math.floor(window.innerWidth * window.devicePixelRatio);
     canvas.height = Math.floor(window.innerHeight * window.devicePixelRatio);
+    // canvas.addEventListener('webglcontextlost', (e) => {e.preventDefault()});
+    // canvas.addEventListener('webglcontextrestored', (e) => {});
+
     const gl = canvas.getContext('webgl2', {alpha: false, depth: false, antialias: false, preserveDrawingBuffer: true});
-  
     if(!gl){
         throw new Error('Unable to initialize WebGL2.');
     }

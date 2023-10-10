@@ -1,6 +1,6 @@
-import fractalDE from "./DE";
-import { palette, gammaCorrection } from "./shading";
-const fs = `
+import fractalDE from "../DE";
+import shadingFunctions from "../shading";
+export const fs = `
     precision mediump float;
     uniform vec2 iResolution;
     uniform int fractal;
@@ -19,8 +19,7 @@ const fs = `
     float far_plane = 10.0;
     float PI = 3.14159265;
     ${fractalDE}
-    ${palette}
-    ${gammaCorrection}
+    ${shadingFunctions}
     void main() {
         vec2 uv = (gl_FragCoord.xy * 2.0 - iResolution) / iResolution.y;
         vec3 pos = camera;
@@ -70,6 +69,6 @@ const fs = `
         gl_FragColor = vec4(color, 1);
     }
 `
-export default fs;
+
 
  

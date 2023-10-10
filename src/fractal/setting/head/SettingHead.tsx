@@ -3,8 +3,8 @@ import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 
-interface HeaderProps {onClick: () => void}
-const Header: FC<HeaderProps> = ({onClick}) => {
+interface SettingHeadProps {onClick: () => void}
+const SettingHead: FC<SettingHeadProps> = ({onClick}) => {
   return (
     <Box display='flex' justifyContent='flex-end' alignItems='center'>
         <IconButton onClick={onClick}>
@@ -14,4 +14,4 @@ const Header: FC<HeaderProps> = ({onClick}) => {
   )
 }
 
-export default Header
+export default SettingHead;

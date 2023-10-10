@@ -3,8 +3,7 @@ import Drawer from '@mui/material/Drawer';
 import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
 import SettingsIcon from '@mui/icons-material/Settings';
-import Header from './header';
-
+import SettingHead from './head';
 interface SettingProps {children: ReactNode}
 const Setting: FC<SettingProps> = ({children}) => {
   const [open, setOpen] = useState(false);
@@ -27,7 +26,7 @@ const Setting: FC<SettingProps> = ({children}) => {
           }
         }}
       >
-        <Header onClick={handleDrawerClose}/>
+        <SettingHead onClick={handleDrawerClose}/>
         <Divider/>
         {children}
       </Drawer>
@@ -41,7 +40,7 @@ const Setting: FC<SettingProps> = ({children}) => {
           zIndex: 99
         }} 
       >
-          <SettingsIcon sx={{fontSize: '48px', color: 'ghostwhite'}}/>
+        <SettingsIcon sx={{fontSize: '48px', color: 'ghostwhite'}}/>
       </IconButton>
     </>
   )

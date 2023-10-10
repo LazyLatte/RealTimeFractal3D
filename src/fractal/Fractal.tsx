@@ -1,21 +1,21 @@
 import { useEffect, useRef, useCallback, useMemo } from 'react';
 import Control from './control';
 import StateDisplay from './state-display';
-import Setting, {SettingContent, useSettingReducer} from './setting';
-import useRender from './shader';
+import Setting, {SettingContent, SettingFoot, useSettingReducer} from './setting';
+import useRender from './webgl';
 import { vec3 } from 'gl-matrix';
 const Fractal = () => {
   const render = useMemo(() => useRender(), []);
   const fractalRef = useRef<HTMLDivElement>(null);
   
   const [state, dispatch] = useSettingReducer();
-  const {fractal, neon, color, julia, params, camera, front, eps, ray_multiplier} = state;
+  const {fractal, neon, color, juliaEnabled, julia, params, camera, front, eps, ray_multiplier} = state;
   const paramValues = Array(3).fill(0).map((_, i) => i < params.length ? params[i].value : 0) as vec3; // pad to vec3
 
   const draw = useCallback(() => {
     const rgb = vec3.fromValues(color.r, color.g, color.b);
     vec3.scale(rgb, rgb, 1 / 255);
-    const cvs = render(fractal, paramValues, camera, front, julia[0], julia[1], neon, rgb, eps, ray_multiplier);
+    const cvs = render(fractal, paramValues, camera, front, juliaEnabled, julia, neon, rgb, eps, ray_multiplier);
     fractalRef.current?.append(cvs);
   }, [state])
   useEffect(() => {
@@ -27,6 +27,7 @@ const Fractal = () => {
       <Control dispatch={dispatch}/>
       <Setting>
         <SettingContent setting={state} dispatch={dispatch}/>
+        <SettingFoot dispatch={dispatch}/>
       </Setting>
     </div>
   )

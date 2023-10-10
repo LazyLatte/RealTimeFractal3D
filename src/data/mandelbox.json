@@ -1,0 +1,32 @@
+{
+    "params": [{
+        "label": "scale",
+        "minValue": -3,
+        "maxValue": 3,
+        "step": 0.1,
+        "value": -1.7
+    }, {
+        "label": "minR",
+        "minValue": 0,
+        "maxValue": 1,
+        "step": 0.1,
+        "value": 0.5
+    }, {
+        "label": "fold",
+        "minValue": 0,
+        "maxValue": 2,
+        "step": 0.1,
+        "value": 1
+    }],
+    "juliaEnabled": false,
+    "julia": [0, 0, 0],
+    "color": {
+        "r": 25,
+        "g": 94,
+        "b": 124
+    },
+    "neon": false,
+    "camera": [0, 7, 0],
+    "eps": 0.0025,
+    "ray_multiplier": 0.5
+}

@@ -1,12 +1,17 @@
 import {useReducer} from 'react';
 import { vec2, vec3, mat4 } from "gl-matrix";
-import { RGBColor } from "react-color";
-import { Fractal, Param } from './interfaces';
-import { fractalDE_JS } from '../shader';
+import { Fractal, Param, RGBColor } from './interfaces';
+import { fractalDE_JS } from '../webgl';
+import DefaultMandelBulbSetting from '../../data/mandelbulb.json';
+import DefaultMandelBoxSetting from '../../data/mandelbox.json';
+import DefaultMengerSetting from '../../data/menger.json';
+import DefaultSierpinskiSetting from '../../data/sierpinski.json';
+import DefaultJulia4DSetting from '../../data/julia4D.json';
 export type SettingState = {
     fractal: Fractal;
     params: Param[];
-    julia: [boolean, vec3];
+    juliaEnabled: boolean;
+    julia: vec3;
     color: RGBColor;
     neon: boolean;
     camera: vec3;
@@ -47,132 +52,22 @@ export type SettingAction = {
 } | {
     type: '@SWITCH_FRACTAL';
     fractal: Fractal;
+} | {
+    type: '@RESET';
 }
 
-const defaultMandelBulbSetting: SettingState = {
-    fractal: Fractal.MandelBulb,
-    params: [{
-        label: 'power',
-        minValue: 0,
-        maxValue: 16,
-        step: 0.1,
-        value: 8
-    }],
-    julia: [false, [1, 0, 0]],
-    color: {
-        r: 25,
-        g: 94,
-        b: 124
-    },
-    neon: false,
-    camera: vec3.fromValues(1, 1, 1.414),
-    front: vec3.normalize(vec3.create(), vec3.scale(vec3.create(), vec3.fromValues(1, 1, 1.414), -1)),
-    eps: 0.001,
-    ray_multiplier: 0.5
-}
 
-const defaultMandelBoxSetting: SettingState = {
-    fractal: Fractal.MandelBox,
-    params: [{
-        label: 'scale',
-        minValue: -3,
-        maxValue: 3,
-        step: 0.1,
-        value: -1.7
-    }, {
-        label: 'minR',
-        minValue: 0,
-        maxValue: 1,
-        step: 0.1,
-        value: 0.5
-    }, {
-        label: 'fold',
-        minValue: 0,
-        maxValue: 2,
-        step: 0.1,
-        value: 1
-    }],
-    julia: [false, [0, 0, 0]],
-    color: {
-        r: 25,
-        g: 94,
-        b: 124
-    },
-    neon: false,
-    camera: vec3.fromValues(0, 7, 0),
-    front: vec3.normalize(vec3.create(), vec3.scale(vec3.create(), vec3.fromValues(0, 7, 0), -1)),
-    eps: 0.0025,
-    ray_multiplier: 0.5
-}
 
-const defaultMengerSetting: SettingState = {
-    fractal: Fractal.Menger,
-    params: [],
-    julia: [false, [0, 0, 0]],
-    color: {
-        r: 25,
-        g: 94,
-        b: 124
-    },
-    neon: false,
-    camera: vec3.fromValues(3, 0, 0),
-    front: vec3.normalize(vec3.create(), vec3.scale(vec3.create(), vec3.fromValues(3, 0, 0), -1)),
-    eps: 0.01,
-    ray_multiplier: 0.5
-}
-
-const defaultSierpinskiSetting: SettingState = {
-    fractal: Fractal.Sierpinski,
-    params: [],
-    julia: [false, [0, 0, 0]],
-    color: {
-        r: 25,
-        g: 94,
-        b: 124
-    },
-    neon: false,
-    camera: vec3.fromValues(1.5, 1.5, -1.5),
-    front: vec3.normalize(vec3.create(), vec3.scale(vec3.create(), vec3.fromValues(1.5, 1.5, -1.5), -1)),
-    eps: 0.01,
-    ray_multiplier: 0.5
-}
-
-const defaultJulia4DSetting: SettingState = {
-    fractal: Fractal.Julia4D,
-    params: [{
-        label: 'power',
-        minValue: 2,
-        maxValue: 9,
-        step: 1,
-        value: 2
-    }],
-    julia: [true, [-0.8, -0.4, 0]],
-    color: {
-        r: 25,
-        g: 94,
-        b: 124
-    },
-    neon: false,
-    camera: vec3.fromValues(-1, 1.5, 0),
-    front: vec3.normalize(vec3.create(), vec3.scale(vec3.create(), vec3.fromValues(-1, 1.5, 0), -1)),
-    eps: 0.0015,
-    ray_multiplier: 0.5
-}
-
-const defaultSetting = [defaultMandelBulbSetting, defaultMandelBoxSetting, defaultMengerSetting, defaultSierpinskiSetting, defaultJulia4DSetting];
+const defaultSetting = [DefaultMandelBulbSetting, DefaultMandelBoxSetting, DefaultMengerSetting, DefaultSierpinskiSetting, DefaultJulia4DSetting];
 const getSetting = (fractal: Fractal): SettingState  => {
     const targetsetting = defaultSetting[fractal];
-    return {
-        fractal,
-        params: targetsetting.params.map(e => ({...e})),
-        julia: [targetsetting.julia[0], [targetsetting.julia[1][0], targetsetting.julia[1][1], targetsetting.julia[1][2]]],
-        color: {...targetsetting.color},
-        neon: targetsetting.neon,
-        camera: vec3.clone(targetsetting.camera),
-        front: vec3.clone(targetsetting.front),
-        eps: targetsetting.eps,
-        ray_multiplier: targetsetting.ray_multiplier
-    }
+    const {params, juliaEnabled, neon, eps, ray_multiplier} = targetsetting;
+    const color = {...targetsetting.color};
+    const julia = vec3.fromValues(targetsetting.julia[0], targetsetting.julia[1], targetsetting.julia[2]);
+    const camera = vec3.fromValues(targetsetting.camera[0], targetsetting.camera[1], targetsetting.camera[2]);
+    const front = vec3.create();
+    vec3.normalize(front, vec3.scale(front, camera, -1));
+    return {fractal, juliaEnabled, julia, color, neon, camera, front, eps, ray_multiplier, params: params.map(e => ({...e}))}
 }
 const reducer = (state: SettingState, action: SettingAction): SettingState => {
     switch(action.type){
@@ -181,28 +76,20 @@ const reducer = (state: SettingState, action: SettingAction): SettingState => {
             return {...state, params: state.params.map((e, i) => i===idx ? {...e, value} : e) }
         }
         case '@SET_JULIA': {
+            const {julia} = state;
             const {juliaConst, idx} = action;
-            const newJulia = state.julia[1];
+            const newJulia = [julia[0], julia[1], julia[2]] as vec3;
             newJulia[idx] = juliaConst;
-            return {...state, julia: [state.julia[0], newJulia]}
+            return {...state, julia: newJulia}
         }
-        case '@TOGGLE_JULIA': {
-            const {juliaEnabled} = action;
-            return {...state, julia: [juliaEnabled, state.julia[1]]}
-        }
-        case '@TOGGLE_NEON': {
-            const {neon} = action;
-            return {...state, neon};
-        }
-        case '@SET_COLOR': {
-            const {color} = action;
-            return {...state, color};
-        }
+        case '@TOGGLE_JULIA': return {...state, juliaEnabled: action.juliaEnabled}
+        case '@TOGGLE_NEON': return {...state, neon: action.neon};
+        case '@SET_COLOR': return {...state, color: {...action.color}};
         case '@MOVE_CAMERA': {
             const {dir} = action;
-            const {fractal, params, julia, camera, front} = state;
+            const {fractal, params, juliaEnabled, julia, camera, front} = state;
             const paramValues = Array(3).fill(0).map((_, i) => i < params.length ? params[i].value : 0) as vec3; // pad to vec3
-            const DE = fractalDE_JS(fractal, camera, paramValues, julia[0], julia[1]);
+            const DE = fractalDE_JS(fractal, camera, paramValues, juliaEnabled, julia);
             const translateFactor = 0.2;
             const dist = Math.abs(DE) * translateFactor;
 
@@ -223,18 +110,15 @@ const reducer = (state: SettingState, action: SettingAction): SettingState => {
             mat4.fromTranslation(translationMatrix, translate);
             vec3.transformMat4(newCamera, camera, translationMatrix);
 
-            return {
-                ...state,
-                camera: newCamera
-            };
+            return {...state, camera: newCamera};
         }
         case '@ROTATE_CAMERA': {
             const {dir} = action;
             const r = vec2.length(dir);
             const rotateFactor = 0.05;
-            const {fractal, params, julia, camera, front} = state;
+            const {fractal, params, juliaEnabled, julia, camera, front} = state;
             const paramValues = Array(3).fill(0).map((_, i) => i < params.length ? params[i].value : 0) as vec3; // pad to vec3
-            const DE = fractalDE_JS(fractal, camera, paramValues, julia[0], julia[1]);
+            const DE = fractalDE_JS(fractal, camera, paramValues, juliaEnabled, julia);
             const theta = Math.min(Math.abs(DE), 0.04) * r * rotateFactor;
             const newFront = vec3.create();
                         
@@ -275,12 +159,9 @@ const reducer = (state: SettingState, action: SettingAction): SettingState => {
                 ray_multiplier: increase ? Math.min(ray_multiplier / 0.9, 1.0) : Math.max(ray_multiplier * 0.9, 0.01)
             }
         }
-        case '@SWITCH_FRACTAL': {
-            const {fractal} = action;
-            return getSetting(fractal);
-        }
-        default:
-            return state;
+        case '@SWITCH_FRACTAL': return getSetting(action.fractal);
+        case '@RESET': return getSetting(state.fractal);
+        default: return state;
     }
 }
 

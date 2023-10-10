@@ -10,7 +10,7 @@ interface FractalSelectorProps {
     fractal: Fractal;
     juliaEnabled: boolean;
     switchFractal: (nextFractal: Fractal) => void;
-    toggleJulia: (juliaEnabled: boolean) => void;
+    toggleJulia: (enabled: boolean) => void;
 }
 
 const FractalSelector: FC<FractalSelectorProps> = ({fractal, juliaEnabled, switchFractal, toggleJulia}) => {

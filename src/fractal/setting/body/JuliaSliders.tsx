@@ -4,15 +4,15 @@ import Typography from '@mui/material/Typography';
 import Slider from '@mui/material/Slider';
 import { vec3 } from 'gl-matrix';
 interface JuliaSlidersProps {
-    julia: [boolean, vec3];
+    julia: vec3;
+    juliaEnabled: boolean;
     setJulia: (j: number, idx: number) => void;
 }
 const j_min = -10;
 const j_max = 10;
 const j_step = 0.1;
-const JuliaSliders: FC<JuliaSlidersProps> = ({julia, setJulia}) => {
+const JuliaSliders: FC<JuliaSlidersProps> = ({juliaEnabled, julia, setJulia}) => {
     const labels = ['Jx', 'Jy', 'Jz'] as const;
-    const [juliaEnabled, juliaVector] = julia;
     const handleSliderChange = (newValue: number | number[], idx: number) => {
         if (typeof newValue === 'number') {
             setJulia(newValue, idx);
@@ -29,7 +29,7 @@ const JuliaSliders: FC<JuliaSlidersProps> = ({julia, setJulia}) => {
                         min={j_min}
                         max={j_max}
                         step={j_step}
-                        value={juliaVector[i]}
+                        value={julia[i]}
                         onChange={(_, newValue) => handleSliderChange(newValue, i)}
                         valueLabelDisplay="auto"
                         disabled={!juliaEnabled}
