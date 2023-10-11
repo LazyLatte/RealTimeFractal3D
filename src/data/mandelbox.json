@@ -24,13 +24,13 @@
     "juliaEnabled": false,
     "julia": [0, 0, 0],
     "color": {
-        "r": 25,
-        "g": 94,
-        "b": 124
+        "r": 48,
+        "g": 127,
+        "b": 140
     },
     "neon": false,
     "camera": [0, 7, 0],
-    "eps": 0.0025,
+    "eps": 0.001,
     "ray_multiplier": 0.5,
     "far_plane": 20.0
 }

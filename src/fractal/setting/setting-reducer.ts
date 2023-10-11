@@ -7,6 +7,8 @@ import DefaultMandelBoxSetting from '../../data/mandelbox.json';
 import DefaultMengerSetting from '../../data/menger.json';
 import DefaultSierpinskiSetting from '../../data/sierpinski.json';
 import DefaultJulia4DSetting from '../../data/julia4D.json';
+import Sample_0 from '../../data/samples/0/0.json';
+import Sample_1 from '../../data/samples/1/1.json';
 export type SettingState = {
     fractal: Fractal;
     params: Param[];
@@ -55,9 +57,10 @@ export type SettingAction = {
     fractal: Fractal;
 } | {
     type: '@RESET';
+} | {
+    type: '@FROM_SAMPLE';
+    idx: number;
 }
-
-
 
 const defaultSetting = [DefaultMandelBulbSetting, DefaultMandelBoxSetting, DefaultMengerSetting, DefaultSierpinskiSetting, DefaultJulia4DSetting];
 const getSetting = (fractal: Fractal): SettingState  => {
@@ -70,10 +73,17 @@ const getSetting = (fractal: Fractal): SettingState  => {
     vec3.normalize(front, vec3.scale(front, camera, -1));
     return {fractal, juliaEnabled, julia, color, neon, camera, front, eps, ray_multiplier, far_plane, params: params.map(e => ({...e}))}
 }
-// handle context lost
+const samples = [Sample_0, Sample_1];
+const fromSample = (idx: number): SettingState => {
+    const targetSample = samples[idx];
+    const {fractal, params, juliaEnabled, neon, color, eps, ray_multiplier, far_plane} = targetSample;
+    const targetSetting = defaultSetting[fractal];
+    const camera = vec3.fromValues(targetSample.camera[0], targetSample.camera[1], targetSample.camera[2]);
+    const front = vec3.fromValues(targetSample.front[0], targetSample.front[1], targetSample.front[2]);
+    const julia = [targetSample.julia[0], targetSample.julia[1], targetSample.julia[2]] as vec3;
+    return {fractal, params: targetSetting.params.map((e, i) => ({...e, value: params[i]})), camera, front, juliaEnabled, julia, neon, color, eps, ray_multiplier, far_plane};
+}
 // find best default params
-// preservebuufer false
-// keep rotate even when mouse is on screen edge
 const reducer = (state: SettingState, action: SettingAction): SettingState => {
     switch(action.type){
         case '@SET_PARAM': {
@@ -162,8 +172,9 @@ const reducer = (state: SettingState, action: SettingAction): SettingState => {
         }
         case '@SWITCH_FRACTAL': return getSetting(action.fractal);
         case '@RESET': return getSetting(state.fractal);
+        case '@FROM_SAMPLE': return fromSample(action.idx);
         default: return state;
     }
 }
 
-export const useSettingReducer = () => useReducer(reducer, getSetting(Fractal.Menger));
+export const useSettingReducer = () => useReducer(reducer, getSetting(Fractal.MandelBox));

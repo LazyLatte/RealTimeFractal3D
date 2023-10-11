@@ -2,19 +2,17 @@ import { vec3 } from "gl-matrix";
 import {vs, fs} from "./shader";
 import { Fractal } from "../setting";
 
-
+const canvas = document.createElement("canvas");
+canvas.id = "fractal-canvas";
+canvas.style.width = `${window.innerWidth}px`;
+canvas.style.height = `${window.innerHeight}px`;
+canvas.width = Math.floor(window.innerWidth * window.devicePixelRatio);
+canvas.height = Math.floor(window.innerHeight * window.devicePixelRatio);
+// canvas.addEventListener('webglcontextlost', (e) => {e.preventDefault()}); navigate to Error page
+// canvas.addEventListener('webglcontextrestored', (e) => {}); navigate back
 
 function useRender() {
-    const canvas = document.createElement("canvas");
-    canvas.id = "fractal-canvas";
-    canvas.style.width = `${window.innerWidth}px`;
-    canvas.style.height = `${window.innerHeight}px`;
-    canvas.width = Math.floor(window.innerWidth * window.devicePixelRatio);
-    canvas.height = Math.floor(window.innerHeight * window.devicePixelRatio);
-    // canvas.addEventListener('webglcontextlost', (e) => {e.preventDefault()});
-    // canvas.addEventListener('webglcontextrestored', (e) => {});
-
-    const gl = canvas.getContext('webgl2', {alpha: false, depth: false, antialias: false, preserveDrawingBuffer: true});
+    const gl = canvas.getContext('webgl2', {alpha: false, depth: false, antialias: false});
     if(!gl){
         throw new Error('Unable to initialize WebGL2.');
     }

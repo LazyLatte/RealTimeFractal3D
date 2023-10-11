@@ -2,7 +2,6 @@ import { useState, FC, Dispatch} from 'react';
 import { SettingAction } from '../setting';
 interface ControlProps {dispatch: Dispatch<SettingAction>}
 const Control: FC<ControlProps> = ({dispatch}) => {
-    const [freeCamera, setFreeCamera] = useState(false);
     const [evtButton, setEvtButton] = useState(-1);
     return (
         <div 
@@ -14,15 +13,21 @@ const Control: FC<ControlProps> = ({dispatch}) => {
                 left: 0, 
                 backgroundColor: 'transparent',
                 zIndex: 99,
-                cursor: freeCamera ? 'none' : 'pointer'
+                cursor: 'pointer'
             }} 
             tabIndex={0}
             onContextMenu={e => e.preventDefault()}
             onMouseDown={(e) => setEvtButton(e.button)}
             onMouseUp={() => setEvtButton(-1)}
-            onClick={() => setFreeCamera(prev => !prev)}
+            onClick={(e) => {
+                if(document.pointerLockElement){
+                    document.exitPointerLock();
+                }else{
+                    e.currentTarget.requestPointerLock();
+                }
+            }}
             onMouseMove={(e) => {
-                if(freeCamera){
+                if(document.pointerLockElement){
                     if(e.movementX === 0 && e.movementY === 0) return;
                     dispatch({type: '@ROTATE_CAMERA', dir: [-e.movementY, -e.movementX]})
                 }
