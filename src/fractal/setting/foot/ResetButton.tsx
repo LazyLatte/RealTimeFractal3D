@@ -4,7 +4,7 @@ import RestartAltIcon from '@mui/icons-material/RestartAlt';
 interface ResetButtonProps {reset: () => void;}
 const ResetButton: FC<ResetButtonProps> = ({reset}) => {
   return (
-    <IconButton aria-label="reset" color='secondary' onClick={reset}>
+    <IconButton aria-label="reset" color='primary' onClick={reset}>
         <RestartAltIcon sx={{fontSize: '48px'}}/>
     </IconButton>
   )

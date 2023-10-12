@@ -11,8 +11,17 @@ const SaveButton: FC<SaveButtonProps> = ({draw}) => {
         link.click();
     }
     return (
-        <IconButton aria-label="save-img" color='secondary' onClick={saveImg} >
-            <DownloadIcon sx={{fontSize: '48px'}}/>
+        <IconButton 
+            aria-label="save-img" 
+            onClick={saveImg} 
+            sx={{
+                position: 'absolute', 
+                bottom: 8, 
+                left: 8, 
+                zIndex: 99
+            }} 
+        >
+            <DownloadIcon sx={{fontSize: '48px', color: 'ghostwhite'}}/>
         </IconButton>
     )
 }

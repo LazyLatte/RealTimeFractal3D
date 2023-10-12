@@ -14,8 +14,7 @@ export const fs = `
     uniform bool neon;
     uniform float eps;
     uniform float ray_multiplier;
-    uniform float far_plane;
-
+    
     const int ray_step = 2000;
     const float FOV = 1.0;
     const float PI = 3.14159265;
@@ -29,6 +28,7 @@ export const fs = `
 
         float dist = 0.0;
         float orbit = 0.0;
+        float far_plane = 10.0;
         for(int i=0; i<ray_step; i++){
             vec2 map = fractalDE(camera + dist * ray_dir);
             float DE = map.x;

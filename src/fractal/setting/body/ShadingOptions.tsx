@@ -1,5 +1,6 @@
 import { FC, ChangeEvent } from 'react';
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
 import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
@@ -11,8 +12,9 @@ interface ShadingOptionsProps {
     neon: boolean;
     setColor:  (newColor: RGBColor) => void;
     toggleNeon: (neon: boolean) => void;
+    fromSample: (idx: number) => void;
 }
-const ShadingOptions: FC<ShadingOptionsProps> = ({color, neon, setColor, toggleNeon}) => {
+const ShadingOptions: FC<ShadingOptionsProps> = ({color, neon, setColor, toggleNeon, fromSample}) => {
     const handleCheckboxChange = (_: ChangeEvent<HTMLInputElement>, checked: boolean) => toggleNeon(checked);
     const neonCheckBox = <Checkbox checked={neon} onChange={handleCheckboxChange}/>;
     return (
@@ -22,6 +24,8 @@ const ShadingOptions: FC<ShadingOptionsProps> = ({color, neon, setColor, toggleN
                 <FormGroup>
                     <FormControlLabel control={neonCheckBox} label="neon" sx={{margin: 0}}/>
                 </FormGroup>
+                <Button sx={{fontSize: '8px'}} onClick={()=>fromSample(0)}>sample0</Button>
+                <Button sx={{fontSize: '8px'}} onClick={()=>fromSample(1)}>sample1</Button>
             </FormControl>
         </Box>
     )

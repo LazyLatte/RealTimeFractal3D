@@ -1,19 +1,21 @@
 import { FC, Dispatch } from 'react'
 import Box from '@mui/material/Box';
 import ResetButton from './ResetButton';
-import SaveButton from './SaveButton';
-import { SettingAction } from '..';
+import FromClipboard from './FromClipboard';
+import ToClipboard from './ToClipboard';
+import { SettingState, SettingAction } from '..';
 interface SettingFootProps {
-  draw: () => HTMLCanvasElement; 
+  setting: SettingState;
   dispatch: Dispatch<SettingAction>;
 }
-const SettingFoot: FC<SettingFootProps> = ({draw, dispatch}) => {
+const SettingFoot: FC<SettingFootProps> = ({setting, dispatch}) => {
   const reset = () => dispatch({type: '@RESET'});
-  const test_function = () => dispatch({type: '@FROM_SAMPLE', idx: 1});
+  const load = (data: Object) => dispatch({type: '@FROM_CLIPBOARD', data});
   return (
     <Box display='flex' flexDirection='row' justifyContent='space-around' alignItems='center' margin='40px 0'>
-        <ResetButton reset={test_function}/>
-        <SaveButton draw={draw}/>
+        <ResetButton reset={reset}/>
+        <FromClipboard load={load}/>
+        <ToClipboard setting={setting}/>
     </Box>
   )
 }

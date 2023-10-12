@@ -69,7 +69,7 @@ function useRender() {
     const iRes_location = gl.getUniformLocation(program, "iResolution");
     gl.uniform2f(iRes_location, canvas.width, canvas.height);
 
-    return (fractal: Fractal, params: number[], camera: vec3, front: vec3, juliaEnabled: boolean, julia: vec3, neon: boolean, palette_seed: vec3, eps: number, ray_multiplier: number, far_plane: number) => {
+    return (fractal: Fractal, params: number[], camera: vec3, front: vec3, juliaEnabled: boolean, julia: vec3, neon: boolean, palette_seed: vec3, eps: number, ray_multiplier: number,) => {
         const fractal_location = gl.getUniformLocation(program, "fractal");
         const camera_location = gl.getUniformLocation(program, "camera");
         const front_location = gl.getUniformLocation(program, "front");
@@ -79,7 +79,6 @@ function useRender() {
         const palette_seed_location = gl.getUniformLocation(program, "palette_seed");
         const eps_location = gl.getUniformLocation(program, "eps");
         const ray_multiplier_location = gl.getUniformLocation(program, "ray_multiplier");
-        const far_plane_location = gl.getUniformLocation(program, "far_plane");
         gl.uniform1i(fractal_location, fractal);
         gl.uniform3f(camera_location, camera[0], camera[1], camera[2]);
         gl.uniform3f(front_location, front[0], front[1], front[2]);
@@ -89,7 +88,6 @@ function useRender() {
         gl.uniform3f(palette_seed_location, palette_seed[0], palette_seed[1], palette_seed[2]);
         gl.uniform1f(eps_location, eps);
         gl.uniform1f(ray_multiplier_location, ray_multiplier);
-        gl.uniform1f(far_plane_location, far_plane);
         params.forEach((e, i) => {
           const param_location = gl.getUniformLocation(program, `params[${i}]`);
           gl.uniform1f(param_location, e);

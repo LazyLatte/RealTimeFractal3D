@@ -1,12 +1,12 @@
 import {useReducer} from 'react';
 import { vec2, vec3, mat4 } from "gl-matrix";
-import { Fractal, Param, RGBColor } from './interfaces';
+import { Fractal, Param, ClipBoardData, RGBColor } from './interfaces';
 import { fractalDE_JS } from '../webgl';
-import DefaultMandelBulbSetting from '../../data/mandelbulb.json';
-import DefaultMandelBoxSetting from '../../data/mandelbox.json';
-import DefaultMengerSetting from '../../data/menger.json';
-import DefaultSierpinskiSetting from '../../data/sierpinski.json';
-import DefaultJulia4DSetting from '../../data/julia4D.json';
+import DefaultMandelBulbSetting from '../../data/default-setting/mandelbulb.json';
+import DefaultMandelBoxSetting from '../../data/default-setting/mandelbox.json';
+import DefaultMengerSetting from '../../data/default-setting/menger.json';
+import DefaultSierpinskiSetting from '../../data/default-setting/sierpinski.json';
+import DefaultJulia4DSetting from '../../data/default-setting/julia4D.json';
 import Sample_0 from '../../data/samples/0/0.json';
 import Sample_1 from '../../data/samples/1/1.json';
 export type SettingState = {
@@ -20,7 +20,6 @@ export type SettingState = {
     front: vec3;
     eps: number;
     ray_multiplier: number;
-    far_plane: number;
 }
 
 export type SettingAction = {
@@ -60,29 +59,33 @@ export type SettingAction = {
 } | {
     type: '@FROM_SAMPLE';
     idx: number;
+} | {
+    type: '@FROM_CLIPBOARD';
+    data: Object;
 }
 
-const defaultSetting = [DefaultMandelBulbSetting, DefaultMandelBoxSetting, DefaultMengerSetting, DefaultSierpinskiSetting, DefaultJulia4DSetting];
+const defaultSetting = [DefaultMandelBulbSetting, DefaultMandelBoxSetting, DefaultMengerSetting, DefaultSierpinskiSetting, DefaultJulia4DSetting] as const;
 const getSetting = (fractal: Fractal): SettingState  => {
     const targetsetting = defaultSetting[fractal];
-    const {params, juliaEnabled, neon, eps, ray_multiplier, far_plane} = targetsetting;
+    const {params, juliaEnabled, neon, eps, ray_multiplier} = targetsetting;
+    const camera = [targetsetting.camera[0], targetsetting.camera[1], targetsetting.camera[2]] as vec3;
+    const front = [-targetsetting.camera[0], -targetsetting.camera[1], -targetsetting.camera[2]] as vec3;
     const julia = [targetsetting.julia[0], targetsetting.julia[1], targetsetting.julia[2]] as vec3;
     const color = {...targetsetting.color};
-    const camera = vec3.fromValues(targetsetting.camera[0], targetsetting.camera[1], targetsetting.camera[2]);
-    const front = vec3.create();
-    vec3.normalize(front, vec3.scale(front, camera, -1));
-    return {fractal, juliaEnabled, julia, color, neon, camera, front, eps, ray_multiplier, far_plane, params: params.map(e => ({...e}))}
+    vec3.normalize(front, front);
+    return {fractal, juliaEnabled, julia, color, neon, camera, front, eps, ray_multiplier, params: params.map(e => ({...e}))}
 }
 const samples = [Sample_0, Sample_1];
 const fromSample = (idx: number): SettingState => {
     const targetSample = samples[idx];
-    const {fractal, params, juliaEnabled, neon, color, eps, ray_multiplier, far_plane} = targetSample;
+    const {fractal, params, juliaEnabled, neon, color, eps, ray_multiplier} = targetSample;
     const targetSetting = defaultSetting[fractal];
-    const camera = vec3.fromValues(targetSample.camera[0], targetSample.camera[1], targetSample.camera[2]);
-    const front = vec3.fromValues(targetSample.front[0], targetSample.front[1], targetSample.front[2]);
+    const camera = [targetSample.camera[0], targetSample.camera[1], targetSample.camera[2]] as vec3;
+    const front = [targetSample.front[0], targetSample.front[1], targetSample.front[2]] as vec3;
     const julia = [targetSample.julia[0], targetSample.julia[1], targetSample.julia[2]] as vec3;
-    return {fractal, params: targetSetting.params.map((e, i) => ({...e, value: params[i]})), camera, front, juliaEnabled, julia, neon, color, eps, ray_multiplier, far_plane};
+    return {fractal, params: targetSetting.params.map((e, i) => ({...e, value: params[i]})), camera, front, juliaEnabled, julia, neon, color, eps, ray_multiplier};
 }
+
 // find best default params
 const reducer = (state: SettingState, action: SettingAction): SettingState => {
     switch(action.type){
@@ -157,22 +160,40 @@ const reducer = (state: SettingState, action: SettingAction): SettingState => {
         case '@SET_EPS': {
             const {eps} = state;
             const {increase} = action;
-            return {
-                ...state,
-                eps: increase ? Math.min(eps / 0.9, 0.01) : Math.max(eps * 0.9, 1e-7)
-            } 
+            return {...state, eps: increase ? Math.min(eps / 0.9, 0.01) : Math.max(eps * 0.9, 1e-7)} 
         }
         case '@SET_RAY_MULTIPLIER': {
             const {ray_multiplier} = state;
             const {increase} = action;
-            return {
-                ...state,
-                ray_multiplier: increase ? Math.min(ray_multiplier / 0.9, 1.0) : Math.max(ray_multiplier * 0.9, 0.01)
-            }
+            return {...state, ray_multiplier: increase ? Math.min(ray_multiplier / 0.9, 1.0) : Math.max(ray_multiplier * 0.9, 0.01)}
         }
         case '@SWITCH_FRACTAL': return getSetting(action.fractal);
         case '@RESET': return getSetting(state.fractal);
         case '@FROM_SAMPLE': return fromSample(action.idx);
+        case '@FROM_CLIPBOARD': {
+            const {data} = action;
+            const {fractal, params, camera, front, juliaEnabled, julia, neon, color, eps, ray_multiplier} = data as ClipBoardData;
+            if(!Number.isInteger(fractal) || !Array.isArray(params) || !Array.isArray(camera) || camera.length !== 3 || !Array.isArray(front) || front.length !== 3 || 
+            !Array.isArray(julia) || julia.length !== 3 || typeof juliaEnabled !== 'boolean' || typeof neon !== 'boolean' || typeof eps !== 'number' || typeof ray_multiplier !== 'number' ||
+            typeof color !== 'object' || typeof color.r !== 'number' || typeof color.g !== 'number' || typeof color.b !== 'number') throw Error('Invalid setting');
+            if(fractal >= defaultSetting.length || fractal < 0) throw Error('No such fractal');
+            const targetFractalDefaultSetting = defaultSetting[fractal];
+            if(params.length !== targetFractalDefaultSetting.params.length) throw Error('Params number not match');
+            params.forEach((e, i) => {
+                if(typeof e !== 'number' || e > targetFractalDefaultSetting.params[i].maxValue || e < targetFractalDefaultSetting.params[i].minValue){
+                    throw Error('Invalid param value');
+                }
+            });
+            for(let i=0; i<3; i++){
+                if(typeof camera[i] !== 'number') throw Error('Invalid camera position');
+                if(typeof front[i] !== 'number') throw Error('Invalid camera direction');
+                if(typeof julia[i] !== 'number') throw Error('Invalid julia vector');
+            };
+            color.r = Math.min(Math.max(color.r, 0), 255);
+            color.g = Math.min(Math.max(color.g, 0), 255);
+            color.b = Math.min(Math.max(color.b, 0), 255);
+            return {fractal, params: targetFractalDefaultSetting.params.map((e, i) => ({...e, value: params[i]})), camera, front, juliaEnabled, julia, neon, color, eps, ray_multiplier};
+        }
         default: return state;
     }
 }

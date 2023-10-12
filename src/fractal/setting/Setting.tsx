@@ -1,11 +1,17 @@
-import { useState, FC, ReactNode} from 'react';
+import { useState, FC, Dispatch} from 'react';
 import Drawer from '@mui/material/Drawer';
 import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
 import SettingsIcon from '@mui/icons-material/Settings';
 import SettingHead from './head';
-interface SettingProps {children: ReactNode}
-const Setting: FC<SettingProps> = ({children}) => {
+import SettingBody from './body';
+import SettingFoot from './foot';
+import { SettingState, SettingAction } from '.';
+interface SettingProps {
+  setting: SettingState;
+  dispatch: Dispatch<SettingAction>;
+}
+const Setting: FC<SettingProps> = (props) => {
   const [open, setOpen] = useState(false);
   const handleOpenDrawer = () => setOpen(true);
   const handleDrawerClose = () => setOpen(false);
@@ -28,7 +34,8 @@ const Setting: FC<SettingProps> = ({children}) => {
       >
         <SettingHead onClick={handleDrawerClose}/>
         <Divider/>
-        {children}
+        <SettingBody {...props}/>
+        <SettingFoot {...props}/>
       </Drawer>
       <IconButton 
         aria-label="setting" 

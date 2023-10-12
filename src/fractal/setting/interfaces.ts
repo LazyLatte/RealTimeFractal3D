@@ -8,3 +8,16 @@ export interface Param {
     marks: number[];
     value: number;
 }
+
+export interface ClipBoardData {
+    fractal: number;
+    params: number[];
+    juliaEnabled: boolean;
+    julia: [number, number, number];
+    color: {r: number, g: number, b: number};
+    neon: boolean;
+    camera: [number, number, number];
+    front: [number, number, number];
+    eps: number;
+    ray_multiplier: number;
+}
