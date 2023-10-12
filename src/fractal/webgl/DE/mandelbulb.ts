@@ -1,8 +1,10 @@
 import { vec3 } from "gl-matrix";
+const iter = 9;
+const bailout = 2.0;
 export const mandelbulbDE = `
     vec2 mandelbulbDE(vec3 p) {
-        const int iter = 9;
-        const float bailout = 2.0;
+        const int iter = ${iter};
+        const float bailout = float(${bailout});
         float power = params[0];
         vec3 c = juliaEnabled ? julia : p;
         vec3 v = p;
@@ -28,12 +30,10 @@ export const mandelbulbDE = `
 `
 
 export const mandelbulbDE_JS = (p: vec3, power: number, juliaEnabled: boolean, julia: vec3): number => {
-    const iter = 9;
-    const bailout = 2.0;
     const c = juliaEnabled ? vec3.clone(julia) : vec3.clone(p);
     var v = vec3.clone(p);
     var dr = 1.0;             
-    var r = Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);  
+    var r = vec3.length(v); 
     
     for (let i = 0; i < iter; i++) {
         const r_pow_n_minus_one = Math.pow(r, power - 1);
@@ -43,7 +43,7 @@ export const mandelbulbDE_JS = (p: vec3, power: number, juliaEnabled: boolean, j
         dr = power * r_pow_n_minus_one * dr + 1.0;
         vec3.scaleAndAdd(v, c, vec3.fromValues(Math.cos(theta) * Math.cos(phi), Math.cos(phi) * Math.sin(theta), -Math.sin(phi)), r_pow_n);
  
-        r = Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);       
+        r = vec3.length(v);     
         if (r > bailout) break;  
     }
 

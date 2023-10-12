@@ -1,7 +1,8 @@
 import { vec3 } from "gl-matrix";
+const iter = 16;
 export const sierpinskiDE = `
     vec2 sierpinskiDE(vec3 p){
-        const int iter = 8;
+        const int iter = ${iter};
         float scale = 2.0;
         vec3 offset = vec3(1.0);
 
@@ -19,7 +20,6 @@ export const sierpinskiDE = `
 `;
 
 export const sierpinskiDE_JS = (p: vec3): number => {
-    const iter = 15;
     const scale = 2.0;
     const offset = vec3.fromValues(1.0, 1.0, 1.0);
     vec3.scale(offset, offset, 1.0 - scale);

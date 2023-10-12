@@ -1,8 +1,10 @@
 import { vec3 } from "gl-matrix";
+const iter = 64;
+const bailout2 = 1024;
 export const mandelboxDE = `
     vec2 mandelboxDE(vec3 p) {
-        const int iter = 64;
-        const float bailout2 = 1024.0;
+        const int iter = ${iter};
+        const float bailout2 = float(${bailout2});
         float scale = params[0];
         float minRadius2 = params[1] * params[1];
         float fixedRadius2 = 1.0;
@@ -37,8 +39,6 @@ export const mandelboxDE = `
     }
 `
 export const mandelboxDE_JS = (p: vec3, params: number[], juliaEnabled: boolean, julia: vec3): number => {
-    const iter = 8;
-    const bailout2 = 1024; 
     const scale = params[0];
     const minRadius2 = params[1] * params[1];
     const fixedRadius2 = 1.0;
@@ -47,14 +47,14 @@ export const mandelboxDE_JS = (p: vec3, params: number[], juliaEnabled: boolean,
     const c = juliaEnabled ? vec3.clone(julia) : vec3.clone(p);
     var v = vec3.clone(p);
     var dr = 1.0;  
-    var r2 = v[0] * v[0] + v[1] * v[1] + v[2] * v[2];         
-
+    var r2 = vec3.dot(v, v);         
+    if(Math.abs(scale) < 1.0) return 0;
     for (let i = 0; i < iter; i++) {
         if(v[0] > 1){v[0] = 2 - v[0]}else if(v[0] < -1){v[0] = -2 - v[0]}
         if(v[1] > 1){v[1] = 2 - v[1]}else if(v[1] < -1){v[1] = -2 - v[1]}
         if(v[2] > 1){v[2] = 2 - v[2]}else if(v[2] < -1){v[2] = -2 - v[2]}
         vec3.scale(v, v, fold);
-        r2 = v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
+        r2 = vec3.dot(v, v); 
         if(r2 < minRadius2){
             const temp = fixedRadius2 / minRadius2;
             v[0] *= temp;

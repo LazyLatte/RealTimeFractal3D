@@ -86,7 +86,7 @@ const fromSample = (idx: number): SettingState => {
     return {fractal, params: targetSetting.params.map((e, i) => ({...e, value: params[i]})), camera, front, juliaEnabled, julia, neon, color, eps, ray_multiplier};
 }
 
-// find best default params
+
 const reducer = (state: SettingState, action: SettingAction): SettingState => {
     switch(action.type){
         case '@SET_PARAM': {

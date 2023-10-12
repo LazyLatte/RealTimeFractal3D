@@ -10,9 +10,9 @@
     "juliaEnabled": true,
     "julia": [-0.8, -0.4, 0],
     "color": {
-        "r": 25,
-        "g": 94,
-        "b": 124
+        "r": 124,
+        "g": 73,
+        "b": 25
     },
     "neon": false,
     "camera": [-1, 1.5, 0],

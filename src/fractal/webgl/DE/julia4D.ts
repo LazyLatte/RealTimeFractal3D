@@ -1,4 +1,6 @@
 import { vec3 } from "gl-matrix";
+const iter = 24;
+const bailout = 256;
 export const julia4DDE = `
     vec3 qMul(vec3 q1, vec3 q2){return vec3(q1.x*q2.x - q1.y*q2.y - q1.z*q2.z, q1.x*q2.y + q2.x*q1.y, q1.x*q2.z + q2.x*q1.z);}
     vec3 qSquare(vec3 q){return vec3(q.x * q.x - q.y * q.y - q.z * q.z, 2.0 * q.x * q.yz);}
@@ -21,8 +23,8 @@ export const julia4DDE = `
         return q;
     }
     vec2 julia4DDE(vec3 p) {
-        const int iter = 24;
-        const float bailout = 256.0;
+        const int iter = ${iter};
+        const float bailout = float(${bailout});
         float power = params[0];
         vec3 c = juliaEnabled ? julia : p;
         vec3 v = p;
@@ -66,8 +68,6 @@ const qPow_JS = (q: vec3, power: number): vec3 => {
     return q;
 }
 export const julia4DDE_JS = (p: vec3, power: number, juliaEnabled: boolean, julia: vec3): number => {
-    const iter = 24;
-    const bailout = 256.0;
     const c = juliaEnabled ? vec3.clone(julia) : vec3.clone(p);
     var v = vec3.clone(p);
     var dr2 = 1.0;             

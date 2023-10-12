@@ -3,9 +3,9 @@
     "juliaEnabled": false,
     "julia": [0, 0, 0],
     "color": {
-        "r": 25,
-        "g": 94,
-        "b": 124
+        "r": 156,
+        "g": 176,
+        "b": 36
     },
     "neon": false,
     "camera": [3, 0, 0],

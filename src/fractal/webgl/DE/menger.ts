@@ -1,5 +1,6 @@
 import { vec3 } from "gl-matrix";
-const iter = 3;
+const iter = 8;
+const bailout = 2.0;
 export const mengerDE = `
     float sdBox(vec3 p, vec3 b){
         vec3 d = abs(p) - b;
@@ -7,7 +8,7 @@ export const mengerDE = `
     }
     vec2 mengerDE(vec3 p){
         const int iter = ${iter};
-        const float bailout = 2.0;
+        const float bailout = float(${bailout});
         vec3 v = p;
         float scale = 3.0;
         vec3 offset = vec3(1.0);
@@ -37,7 +38,6 @@ const sdBox = (p: vec3, b: vec3) => {
 export const mengerDE_JS = (p: vec3): number => {
     const scale = 3.0;
     const offset = vec3.fromValues(1.0, 1.0, 1.0);
-    vec3.scale(offset, offset, 1.0 - scale);
     var v = vec3.clone(p);
     var s = 1.0;
     const fold = (z: vec3, a: number, b: number) => {
@@ -51,11 +51,13 @@ export const mengerDE_JS = (p: vec3): number => {
         v[0] = Math.abs(v[0]);
         v[1] = Math.abs(v[1]);
         v[2] = Math.abs(v[2]);
+        if(v[0] > bailout || v[1] > bailout || v[2] > bailout) break;
         if(v[0] < v[1]) v = fold(v, 0, 1); 
         if(v[0] < v[2]) v = fold(v, 0, 2);
         if(v[1] < v[2]) v = fold(v, 1, 2); 
         s *= scale;
-        vec3.scaleAndAdd(v, offset, v, scale);
+        vec3.scale(v, v, scale);
+        vec3.scaleAndAdd(v, v, offset, 1.0 - scale);
         const zVal = offset[2] * (scale - 1.0);
         if(v[2] < -0.5 * zVal) v[2] += zVal;
     }

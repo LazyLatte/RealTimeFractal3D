@@ -6,7 +6,10 @@ interface ToClipboardProps {setting: SettingState}
 const ToClipboard: FC<ToClipboardProps> = ({setting}) => {
     const [isCopied, setIsCopied] = useState(false);
     const handleOnClick = () => {
-        const settingData = JSON.stringify({...setting, params: setting.params.map(e => e.value)});
+        const camera = [setting.camera[0], setting.camera[1], setting.camera[2]];
+        const front = [setting.front[0], setting.front[1], setting.front[2]];
+        const julia = [setting.julia[0], setting.julia[1], setting.julia[2]];
+        const settingData = JSON.stringify({...setting, camera, front, julia, params: setting.params.map(e => e.value)});
         navigator.clipboard.writeText(settingData);
         setIsCopied(true);
     }
