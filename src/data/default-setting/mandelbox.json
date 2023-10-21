@@ -24,9 +24,9 @@
     "juliaEnabled": false,
     "julia": [0, 0, 0],
     "color": {
-        "r": 48,
-        "g": 127,
-        "b": 140
+        "r": 201,
+        "g": 25,
+        "b": 38
     },
     "neon": false,
     "camera": [0, 7, 0],

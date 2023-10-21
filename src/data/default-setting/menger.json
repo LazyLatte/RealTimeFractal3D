@@ -1,11 +1,32 @@
 {
-    "params": [],
+    "params": [{
+        "label": "x-rotate",
+        "minValue": 0,
+        "maxValue": 90,
+        "step": 1,
+        "marks": [0, 45, 90],
+        "value": 0
+    },{
+        "label": "y-rotate",
+        "minValue": 0,
+        "maxValue": 90,
+        "step": 1,
+        "marks": [0, 45, 90],
+        "value": 0
+    },{
+        "label": "z-rotate",
+        "minValue": 0,
+        "maxValue": 90,
+        "step": 1,
+        "marks": [0, 45, 90],
+        "value": 0
+    }],
     "juliaEnabled": false,
     "julia": [0, 0, 0],
     "color": {
-        "r": 156,
-        "g": 176,
-        "b": 36
+        "r": 54,
+        "g": 74,
+        "b": 189
     },
     "neon": false,
     "camera": [3, 0, 0],

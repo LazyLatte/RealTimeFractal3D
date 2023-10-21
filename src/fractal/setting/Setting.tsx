@@ -1,4 +1,6 @@
 import { useState, FC, Dispatch} from 'react';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 import Drawer from '@mui/material/Drawer';
 import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
@@ -36,6 +38,10 @@ const Setting: FC<SettingProps> = (props) => {
         <Divider/>
         <SettingBody {...props}/>
         <SettingFoot {...props}/>
+        <Box display='flex' flexDirection='row' justifyContent='space-around' alignItems='center'>
+          <Button sx={{fontSize: '8px'}} onClick={()=>props.dispatch({type: '@FROM_SAMPLE', idx: 0})}>sample 0-red</Button>
+          <Button sx={{fontSize: '8px'}} onClick={()=>props.dispatch({type: '@FROM_SAMPLE', idx: 1})}>sample 0-blue</Button>
+        </Box>
       </Drawer>
       <IconButton 
         aria-label="setting" 

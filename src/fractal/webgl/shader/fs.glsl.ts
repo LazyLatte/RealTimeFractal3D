@@ -11,13 +11,19 @@ export const fs = `
     uniform bool juliaEnabled;
     uniform vec3 julia;
     uniform vec3 palette_seed;
+    uniform float decayCoeff;
+    uniform float fogDensity;
     uniform bool neon;
     uniform float eps;
     uniform float ray_multiplier;
     
     const int ray_step = 2000;
     const float FOV = 1.0;
+    const float far_plane = 10.0;
     const float PI = 3.14159265;
+    const float gloss = 16.0;
+    const vec3 lightColor = vec3(1.0);
+    const vec3 fogColor = vec3(1.0);
     ${fractalDE}
     ${shadingFunctions}
     void main() {
@@ -28,7 +34,6 @@ export const fs = `
 
         float dist = 0.0;
         float orbit = 0.0;
-        float far_plane = 10.0;
         for(int i=0; i<ray_step; i++){
             vec2 map = fractalDE(camera + dist * ray_dir);
             float DE = map.x;
@@ -36,12 +41,9 @@ export const fs = `
             if(abs(DE) < eps || dist > far_plane) break;
             dist += DE * ray_multiplier;
         }
-        dist = dist < far_plane ? dist : -1.0;
 
-        float gloss = 16.0;
-        vec3 lightColor = vec3(1.0, 0.9, 0.8);
         vec3 color = vec3(0.0);
-        if(dist > 0.0){
+        if(dist < far_plane){
             vec3 v = camera + dist * ray_dir;
             vec3 L = -front;
             vec3 N = normalize(vec3(
@@ -50,21 +52,22 @@ export const fs = `
                 fractalDE(v + vec3(0.0, 0.0, eps))[0] - fractalDE(v - vec3(0.0, 0.0, eps))[0]
             ));
             vec3 H = normalize(L - ray_dir);
-
             vec3 lin = vec3(0.0);
             vec3 ambient = vec3(0.1);
-            vec3 diffuse = lightColor * dot(L, N);
-            vec3 specular = diffuse * pow(dot(H, N), gloss);
+            vec3 diffuse = lightColor * clamp(dot(L, N), 0.0, 1.0);
+            vec3 specular = diffuse * pow(clamp(dot(H, N), 0.0, 1.0), gloss);
             
-            color = palette(orbit - 0.4, palette_seed);
+            color = palette(orbit, palette_seed);
             color = neon ? 0.01 / color : color;
 
             lin += ambient;
             lin += diffuse;
             color *= lin;
             color += (0.4 * specular);
-            color = gammaCorrection(color);
+            color = lightIntensityDecay(color, dist);
         }
+        color = fog(color, min(dist, far_plane));
+        color = gammaCorrection(color);
         gl_FragColor = vec4(color, 1);
     }
 `

@@ -1,34 +1,61 @@
-import { FC, ChangeEvent } from 'react';
+import { FC, ChangeEvent, Dispatch } from 'react';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
-import FormGroup from '@mui/material/FormGroup';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import FormControl from '@mui/material/FormControl';
-import ColorPicker from './ColorPicker';
-import { RGBColor  } from 'react-color';
+import Slider from '@mui/material/Slider';
+import Option from './Option';
+import { RgbColorPicker , RgbColor} from "react-colorful";
+import { SettingState, SettingAction } from '..';
 interface ShadingOptionsProps {
-    color: RGBColor;
-    neon: boolean;
-    setColor:  (newColor: RGBColor) => void;
-    toggleNeon: (neon: boolean) => void;
-    fromSample: (idx: number) => void;
+    setting: SettingState;
+    dispatch: Dispatch<SettingAction>;
 }
-const ShadingOptions: FC<ShadingOptionsProps> = ({color, neon, setColor, toggleNeon, fromSample}) => {
-    const handleCheckboxChange = (_: ChangeEvent<HTMLInputElement>, checked: boolean) => toggleNeon(checked);
-    const neonCheckBox = <Checkbox checked={neon} onChange={handleCheckboxChange}/>;
+const SliderStyle = {
+    width: 80,
+    height: 8,
+    "& .MuiSlider-thumb": {
+        width: 16,
+        height: 16
+    }
+}
+const ShadingOptions: FC<ShadingOptionsProps> = ({setting, dispatch}) => {
+    const {neon , decay, fog, color} = setting;
+    const handleCheckboxChange = (_: ChangeEvent<HTMLInputElement>, checked: boolean) => dispatch({type: '@TOGGLE_NEON', neon: checked});
+    const handleOnColorChange = (newColor: RgbColor) => dispatch({type: '@SET_COLOR', color: newColor});
+    const handleDecaySliderChange = (_: Event, newValue: number | number[]) => typeof newValue === 'number' && dispatch({type: '@SET_DECAY', decay: newValue});
+    const handleFogSliderChange = (_: Event, newValue: number | number[]) => typeof newValue === 'number' && dispatch({type: '@SET_FOG', fog: newValue});
     return (
         <Box display='flex' flexDirection='row' justifyContent='flex-start' alignItems='flex-start' sx={{width: 300, marginTop: '20px'}}>
-            <ColorPicker color={color} setColor={setColor}/>
-            <FormControl focused={false} sx={{display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center'}}>
-                <FormGroup>
-                    <FormControlLabel control={neonCheckBox} label="neon" sx={{margin: 0}}/>
-                </FormGroup>
-                <Button sx={{fontSize: '8px'}} onClick={()=>fromSample(0)}>sample0</Button>
-                <Button sx={{fontSize: '8px'}} onClick={()=>fromSample(1)}>sample1</Button>
-            </FormControl>
+            <RgbColorPicker color={color} onChange={handleOnColorChange} style={{width: 150}}/>
+            <Box display='flex' flexDirection='column' justifyContent='flex-start' alignItems='flex-start'>
+            <Option label="neon">
+                <Checkbox checked={neon} onChange={handleCheckboxChange}/>
+            </Option>
+            <Option label="decay">
+                <Slider
+                    min={0}
+                    max={10}
+                    step={1}
+                    value={decay}
+                    onChange={handleDecaySliderChange}
+                    valueLabelDisplay="auto"
+                    sx={SliderStyle}
+                />
+            </Option>
+            <Option label="&nbsp;fog&nbsp;">
+                <Slider
+                    min={0}
+                    max={0.4}
+                    step={0.05}
+                    value={fog}
+                    onChange={handleFogSliderChange}
+                    valueLabelDisplay="auto"
+                    sx={SliderStyle}
+                />
+            </Option>
+            </Box>
         </Box>
     )
 }
 
 export default ShadingOptions;
+

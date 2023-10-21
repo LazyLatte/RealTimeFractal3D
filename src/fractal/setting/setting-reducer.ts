@@ -1,6 +1,6 @@
 import {useReducer} from 'react';
 import { vec2, vec3, mat4 } from "gl-matrix";
-import { Fractal, Param, ClipBoardData, RGBColor } from './interfaces';
+import { Fractal, Param, RgbColor } from './interfaces';
 import { fractalDE_JS } from '../webgl';
 import DefaultMandelBulbSetting from '../../data/default-setting/mandelbulb.json';
 import DefaultMandelBoxSetting from '../../data/default-setting/mandelbox.json';
@@ -9,13 +9,31 @@ import DefaultSierpinskiSetting from '../../data/default-setting/sierpinski.json
 import DefaultJulia4DSetting from '../../data/default-setting/julia4D.json';
 import Sample_0 from '../../data/samples/0/0.json';
 import Sample_1 from '../../data/samples/1/1.json';
+
+interface ClipBoardData {
+    fractal: number;
+    params: number[];
+    juliaEnabled: boolean;
+    julia: [number, number, number];
+    color: {r: number, g: number, b: number};
+    neon: boolean;
+    decay: number;
+    fog: number;
+    camera: [number, number, number];
+    front: [number, number, number];
+    eps: number;
+    ray_multiplier: number;
+}
+
 export type SettingState = {
     fractal: Fractal;
     params: Param[];
     juliaEnabled: boolean;
     julia: vec3;
-    color: RGBColor;
+    color: RgbColor;
     neon: boolean;
+    decay: number;
+    fog: number;
     camera: vec3;
     front: vec3;
     eps: number;
@@ -35,10 +53,16 @@ export type SettingAction = {
     juliaEnabled: boolean;
 } | {
     type: '@SET_COLOR';
-    color: RGBColor;
+    color: RgbColor;
 } | {
     type: '@TOGGLE_NEON';
     neon: boolean;
+} | {
+    type: '@SET_DECAY';
+    decay: number;
+} | {
+    type: '@SET_FOG';
+    fog: number;
 } | {
     type: '@MOVE_CAMERA';
     dir: vec3;
@@ -73,17 +97,17 @@ const getSetting = (fractal: Fractal): SettingState  => {
     const julia = [targetsetting.julia[0], targetsetting.julia[1], targetsetting.julia[2]] as vec3;
     const color = {...targetsetting.color};
     vec3.normalize(front, front);
-    return {fractal, juliaEnabled, julia, color, neon, camera, front, eps, ray_multiplier, params: params.map(e => ({...e}))}
+    return {fractal, juliaEnabled, julia, color, neon, decay: 0, fog: 0, camera, front, eps, ray_multiplier, params: params.map(e => ({...e}))}
 }
 const samples = [Sample_0, Sample_1];
 const fromSample = (idx: number): SettingState => {
     const targetSample = samples[idx];
-    const {fractal, params, juliaEnabled, neon, color, eps, ray_multiplier} = targetSample;
+    const {fractal, params, juliaEnabled, neon, color, decay, fog, eps, ray_multiplier} = targetSample;
     const targetSetting = defaultSetting[fractal];
     const camera = [targetSample.camera[0], targetSample.camera[1], targetSample.camera[2]] as vec3;
     const front = [targetSample.front[0], targetSample.front[1], targetSample.front[2]] as vec3;
     const julia = [targetSample.julia[0], targetSample.julia[1], targetSample.julia[2]] as vec3;
-    return {fractal, params: targetSetting.params.map((e, i) => ({...e, value: params[i]})), camera, front, juliaEnabled, julia, neon, color, eps, ray_multiplier};
+    return {fractal, params: targetSetting.params.map((e, i) => ({...e, value: params[i]})), camera, front, juliaEnabled, julia, neon, color, decay, fog, eps, ray_multiplier};
 }
 
 
@@ -103,6 +127,8 @@ const reducer = (state: SettingState, action: SettingAction): SettingState => {
         case '@TOGGLE_JULIA': return {...state, juliaEnabled: action.juliaEnabled}
         case '@TOGGLE_NEON': return {...state, neon: action.neon};
         case '@SET_COLOR': return {...state, color: {...action.color}};
+        case '@SET_DECAY': return {...state, decay: action.decay};
+        case '@SET_FOG': return {...state, fog: action.fog};
         case '@MOVE_CAMERA': {
             const {dir} = action;
             const {fractal, params, juliaEnabled, julia, camera, front} = state;
@@ -172,7 +198,7 @@ const reducer = (state: SettingState, action: SettingAction): SettingState => {
         case '@FROM_SAMPLE': return fromSample(action.idx);
         case '@FROM_CLIPBOARD': {
             const {data} = action;
-            const {fractal, params, camera, front, juliaEnabled, julia, neon, color, eps, ray_multiplier} = data as ClipBoardData;
+            const {fractal, params, camera, front, juliaEnabled, julia, neon, color, decay, fog, eps, ray_multiplier} = data as ClipBoardData;
             if(!Number.isInteger(fractal) || !Array.isArray(params) || !Array.isArray(camera) || camera.length !== 3 || !Array.isArray(front) || front.length !== 3 || 
             !Array.isArray(julia) || julia.length !== 3 || typeof juliaEnabled !== 'boolean' || typeof neon !== 'boolean' || typeof eps !== 'number' || typeof ray_multiplier !== 'number' ||
             typeof color !== 'object' || typeof color.r !== 'number' || typeof color.g !== 'number' || typeof color.b !== 'number') throw Error('Invalid setting');
@@ -189,13 +215,15 @@ const reducer = (state: SettingState, action: SettingAction): SettingState => {
                 if(typeof front[i] !== 'number') throw Error('Invalid camera direction');
                 if(typeof julia[i] !== 'number') throw Error('Invalid julia vector');
             };
+            if(decay < 0) throw Error('Invalid decay coefficient');
+            if(fog < 0) throw Error('Invalid fog density');
             color.r = Math.min(Math.max(color.r, 0), 255);
             color.g = Math.min(Math.max(color.g, 0), 255);
             color.b = Math.min(Math.max(color.b, 0), 255);
-            return {fractal, params: targetFractalDefaultSetting.params.map((e, i) => ({...e, value: params[i]})), camera, front, juliaEnabled, julia, neon, color, eps, ray_multiplier};
+            return {fractal, params: targetFractalDefaultSetting.params.map((e, i) => ({...e, value: params[i]})), camera, front, juliaEnabled, julia, neon, color, decay, fog, eps, ray_multiplier};
         }
         default: return state;
     }
 }
 
-export const useSettingReducer = () => useReducer(reducer, getSetting(Fractal.MandelBox));
+export const useSettingReducer = () => useReducer(reducer, getSetting(Fractal.MandelBulb));

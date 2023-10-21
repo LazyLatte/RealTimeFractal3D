@@ -17,7 +17,7 @@ const ParamSlider: FC<ParamSliderProps> = ({param, setParam}) => {
     };
 
     return (
-        <Box margin='12px 0'>
+        <Box margin='8px 0'>
             <Typography id="param-label">
                 {label}
             </Typography>

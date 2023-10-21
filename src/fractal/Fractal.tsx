@@ -8,14 +8,14 @@ const Fractal = () => {
   const render = useMemo(() => useRender(), []);
   const fractalRef = useRef<HTMLDivElement>(null);
   const [state, dispatch] = useSettingReducer();
-  const {fractal, neon, color, juliaEnabled, julia, params, camera, front, eps, ray_multiplier} = state;
-  //console.log(camera[0], camera[1], camera[2]);
-  //console.log(front[0], front[1], front[2]);
+  const {fractal, neon, decay, fog, color, juliaEnabled, julia, params, camera, front, eps, ray_multiplier} = state;
+
   const draw = useCallback(() => {
-    const cvs = render(fractal, params.map(e => e.value), camera, front, juliaEnabled, julia, neon, [color.r / 255, color.g / 255, color.b / 255], eps, ray_multiplier);
+    const cvs = render(fractal, params.map(e => e.value), camera, front, juliaEnabled, julia, neon, decay, fog, [color.r / 255, color.g / 255, color.b / 255], eps, ray_multiplier);
     fractalRef.current?.append(cvs);
     return cvs;
   }, [state]);
+  
   useEffect(() => {
       draw();
   }, [draw]);

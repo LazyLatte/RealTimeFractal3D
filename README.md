@@ -1,9 +1,8 @@
 # Real Time Fractal 3D
 
 A webpage for exploring 3D Fractal. User can observe 3D fractal from different angles and distances, or increase precision to generate more details.
-In order to get smoother framerate, I only implement simple blinn phong shading and abandon resourse-consuming shading technique such as shadow and fog.
 
-![image](src/data/samples/1/1.png)
+![image](src/data/samples/0/0.png)
 
 ## Control
 

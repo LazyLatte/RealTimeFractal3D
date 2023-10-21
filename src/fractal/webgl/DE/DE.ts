@@ -30,8 +30,8 @@ export default fractalDE;
 export const fractalDE_JS = (fractal: number, p: vec3, params: number[], juliaEnabled: boolean, julia: vec3): number => {
     if(fractal === MandelBulb) return mandelbulbDE_JS(p, params[0], juliaEnabled, julia);
     if(fractal === MandelBox) return mandelboxDE_JS(p, params, juliaEnabled, julia);
-    if(fractal === Menger) return mengerDE_JS(p);
-    if(fractal === Sierpinski) return sierpinskiDE_JS(p);
+    if(fractal === Menger) return mengerDE_JS(p, params, juliaEnabled, julia);
+    if(fractal === Sierpinski) return sierpinskiDE_JS(p, params, juliaEnabled, julia);
     if(fractal === Julia4D) return julia4DDE_JS(p, params[0], juliaEnabled, julia);
     return 0;
 }
