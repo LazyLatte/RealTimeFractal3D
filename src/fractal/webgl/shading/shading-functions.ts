@@ -21,12 +21,12 @@ const fog = `
     }
 `
 
-const fakeSSS = `
-    vec3 fakeSSS(vec3 color){
-        vec3 s = vec3(0.7, 0.9, 1.0);
-        return vec3(pow(color.r, s.r), pow(color.g, s.g), pow(color.b, s.b));
-    }
-`
+// const fakeSSS = `
+//     vec3 fakeSSS(vec3 color){
+//         vec3 s = vec3(0.7, 0.9, 1.0);
+//         return vec3(pow(color.r, s.r), pow(color.g, s.g), pow(color.b, s.b));
+//     }
+// `
 
 const gammaCorrection = `
     vec3 gammaCorrection(vec3 color){
