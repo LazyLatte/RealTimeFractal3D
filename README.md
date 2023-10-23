@@ -1,6 +1,6 @@
 # Real Time Fractal 3D
 
-A webpage for exploring 3D Fractal. User can observe 3D fractal from different angles and distances, or increase precision to generate more details.
+A webpage for exploring 3D Fractal. User can observe 3D fractal from different angles or increase precision to get detailed fractal.
 
 ![image](src/data/samples/0/0.png)
 
@@ -16,4 +16,4 @@ A webpage for exploring 3D Fractal. User can observe 3D fractal from different a
 
 1. Use higher eps and ray_multiplier when moving the camera.
    
-2. Once you find your desired location, you can decrease eps and ray_multiplier to get detailed image.
+2. Once you find your desired location, you can decrease eps and ray_multiplier to get detailed scene.

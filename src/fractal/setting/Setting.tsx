@@ -39,8 +39,8 @@ const Setting: FC<SettingProps> = (props) => {
         <SettingBody {...props}/>
         <SettingFoot {...props}/>
         <Box display='flex' flexDirection='row' justifyContent='space-around' alignItems='center'>
-          <Button sx={{fontSize: '8px'}} onClick={()=>props.dispatch({type: '@FROM_SAMPLE', idx: 0})}>sample 0-red</Button>
-          <Button sx={{fontSize: '8px'}} onClick={()=>props.dispatch({type: '@FROM_SAMPLE', idx: 1})}>sample 0-blue</Button>
+          <Button onClick={()=>props.dispatch({type: '@FROM_SAMPLE', idx: 0})}>sample 0-red</Button>
+          <Button onClick={()=>props.dispatch({type: '@FROM_SAMPLE', idx: 1})}>sample 0-blue</Button>
         </Box>
       </Drawer>
       <IconButton 
