@@ -1,0 +1,14 @@
+{
+    "params": [8],
+    "juliaEnabled": false,
+    "julia": [1, 0, 0],
+    "camera": [1, 1, 1.414],
+    "eps": 0.001,
+    "ray_multiplier": 0.5,
+    "neon": true,
+    "color": {
+        "r": 203,
+        "g": 41,
+        "b": 212
+    }
+}

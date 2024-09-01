@@ -1,0 +1,7 @@
+{
+    "labels": ["Jx", "Jy", "Jz"],
+    "minValue": -8,
+    "maxValue": 8,
+    "step": 0.1,
+    "marks": [-8, 4, 0, 4, 8]
+}

@@ -1,0 +1,21 @@
+{
+    "params": [{
+        "label": "scale",
+        "minValue": -3,
+        "maxValue": 3,
+        "step": 0.1,
+        "marks": [-3, -2, -1, 1, 2, 3]
+    }, {
+        "label": "minR",
+        "minValue": 0,
+        "maxValue": 1,
+        "step": 0.1,
+        "marks": [0, 0.5, 1]
+    }, {
+        "label": "fold",
+        "minValue": 0,
+        "maxValue": 2,
+        "step": 0.1,
+        "marks": [0, 1, 2]
+    }]
+}

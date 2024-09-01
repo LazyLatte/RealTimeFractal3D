@@ -1,5 +1,5 @@
 import {createBrowserRouter, createRoutesFromElements, Route, RouterProvider} from "react-router-dom";
-import Fractal, {ErrorBoundary} from './fractal';
+import Fractal, {ErrorBoundary} from './features';
 import './App.css'
 
 const router = createBrowserRouter(

@@ -1,0 +1,21 @@
+{
+    "params": [{
+        "label": "x-rotate",
+        "minValue": 0,
+        "maxValue": 180,
+        "step": 1,
+        "marks": [0, 90, 180]
+    },{
+        "label": "y-rotate",
+        "minValue": 0,
+        "maxValue": 180,
+        "step": 1,
+        "marks": [0, 90, 180]
+    },{
+        "label": "z-rotate",
+        "minValue": 0,
+        "maxValue": 180,
+        "step": 1,
+        "marks": [0, 90, 180]
+    }]
+}

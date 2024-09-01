@@ -1,0 +1,15 @@
+{
+    "params": [{
+        "label": "power",
+        "minValue": 2,
+        "maxValue": 9,
+        "step": 1,
+        "marks": [2, 3, 4, 5, 6, 7, 8, 9]
+    }, {
+        "label": "qk",
+        "minValue": -1,
+        "maxValue": 1,
+        "step": 0.01,
+        "marks": [-1, -0.5, 0, 0.5, 1]
+    }]
+}
