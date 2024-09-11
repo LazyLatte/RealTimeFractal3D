@@ -1,8 +1,9 @@
 const palette = `
+    uniform vec3 orbit_freq;
     vec3 palette(float t, vec3 d){
         vec3 a = vec3(0.5);
         vec3 b = vec3(0.5);
-        vec3 c = vec3(1.0);
+        vec3 c = orbit_freq;
         return a + b * cos(2.0 * PI * (c * t + d));
     }
 `
@@ -14,6 +15,7 @@ const decay = `
     }
 `
 
+//fog(final_color, min(dist, far_plane))
 const fog = `
     vec3 fog(vec3 color, float dist){
         float fogRatio = clamp(1.0 / exp(dist * fogDensity), 0.0, 1.0);
@@ -35,4 +37,4 @@ const gammaCorrection = `
     }
 `
 
-export const shading = palette + decay + fog + gammaCorrection;
+export const shading = palette + decay + gammaCorrection;

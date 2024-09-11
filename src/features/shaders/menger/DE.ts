@@ -7,7 +7,7 @@ const sdBox = (p: vec3, b: vec3) => {
     return vec3.length(m) + Math.min(Math.max(d[0], Math.max(d[1],d[2])), 0.0);
 }
 export const mengerDE_JS = (p: vec3, params: number[], juliaEnabled: boolean, julia: number[]): number => {
-    const c = juliaEnabled ? vec3.clone(julia as vec3) : vec3.fromValues(0, 0, 0);
+    const c = juliaEnabled ? vec3.fromValues(julia[0], julia[1], julia[2]) : vec3.fromValues(0, 0, 0);
     const offset = vec3.fromValues(1.0, 1.0, 1.0);
     var v = vec3.clone(p);
     var s = 1.0;
@@ -36,7 +36,7 @@ export const mengerDE_JS = (p: vec3, params: number[], juliaEnabled: boolean, ju
         const zVal = offset[2] * (scale - 1.0);
         if(v[2] < -0.5 * zVal) v[2] += zVal;
         vec3.rotateX(v, v, vec3.fromValues(0, 0, 0), xRad);
-        vec3.rotateY(v, v, vec3.fromValues(0, 0, 0), yRad);
+        vec3.rotateY(v, v, vec3.fromValues(0, 0, 0), -yRad);
         vec3.rotateZ(v, v, vec3.fromValues(0, 0, 0), zRad);
         vec3.add(v, v, c);
     }

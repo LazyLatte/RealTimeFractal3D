@@ -21,6 +21,9 @@ const Fractal = () => {
   useEffect(() => {
       draw();
   }, [draw]);
+  
+  //return <Lighting setting={state} dispatch={dispatch}/>;
+  
   return (
     <div ref={fractalRef} style={{position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, overflow: 'hidden'}}>
       <StateDisplay camera={camera} eps={eps} ray_multiplier={ray_multiplier}/>
@@ -28,7 +31,7 @@ const Fractal = () => {
       <Save draw={draw}/>
       <Setting setting={state} dispatch={dispatch}/>
     </div>
-  )
+  );
 }
 
 export default Fractal;

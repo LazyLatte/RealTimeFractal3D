@@ -1,36 +1,48 @@
 import {useReducer} from 'react';
 import { vec2, vec3, mat4} from "gl-matrix";
 import { Fractal, RgbColor } from './interfaces';
+import { LightingInterface, LightingAction} from './advanced/lighting';
 import { getFractalDE } from '../shaders';
-
+import MandelBulbParamSliderSetting from '../../data/mandelbulb/paramSliderSetting.json';
+import MandelBoxParamSliderSetting from '../../data/mandelbox/paramSliderSetting.json';
+import MengerParamSliderSetting from '../../data/menger/paramSliderSetting.json';
+import SierpinskiParamSliderSetting from '../../data/sierpinski/paramSliderSetting.json';
+import Julia4DParamSliderSetting from '../../data/julia4D/paramSliderSetting.json';
 
 import DefaultMandelBulbSetting from '../../data/mandelbulb/default-setting.json';
 import DefaultMandelBoxSetting from '../../data/mandelbox/default-setting.json';
 import DefaultMengerSetting from '../../data/menger/default-setting.json';
 import DefaultSierpinskiSetting from '../../data/sierpinski/default-setting.json';
 import DefaultJulia4DSetting from '../../data/julia4D/default-setting.json';
-import Sample_0 from '../../data/mandelbox/sample/0.json';
-import Sample_1 from '../../data/mandelbox/sample/1.json';
+import Sample_0 from '../../data/mandelbox/sample/1.json';
+//import Sample_0 from '../../data/menger/sample/0.json';
+import Sample_1 from '../../data/menger/sample/1.json';
 
 interface ClipBoardData {
     fractal: number;
     params: number[];
     juliaEnabled: boolean;
-    julia: [number, number, number];
-    color: {r: number, g: number, b: number};
-    neon: boolean;
-    decay: number;
-    fog: number;
+    julia: number[];
     camera: [number, number, number];
     front: [number, number, number];
     eps: number;
     ray_multiplier: number;
+    style: {
+        color: {r: number, g: number, b: number};
+        lighting: LightingInterface;
+        orbit_freq: [number, number, number];
+        shadow: boolean;
+        neon: boolean;
+        decay: number; 
+    }
 }
 export type FractalStyle = {
     color: RgbColor;
+    lighting: LightingInterface;
+    shadow: boolean;
     neon: boolean;
     decay: number;
-    fog: number;  
+    orbit_freq: [number, number, number];
 }
 export type SettingState = {
     fractal: Fractal;
@@ -61,14 +73,18 @@ export type SettingAction = {
     type: '@SET_COLOR';
     color: RgbColor;
 } | {
+    type: '@SET_ORBIT_FREQUENCY';
+    value: number;
+    idx: number;
+} | {
     type: '@TOGGLE_NEON';
     neon: boolean;
 } | {
+    type: '@TOGGLE_SHADOW';
+    shadow: boolean;
+} | {
     type: '@SET_DECAY';
     decay: number;
-} | {
-    type: '@SET_FOG';
-    fog: number;
 } | {
     type: '@MOVE_CAMERA';
     dir: vec3;
@@ -92,10 +108,10 @@ export type SettingAction = {
 } | {
     type: '@FROM_CLIPBOARD';
     data: Object;
-}
+} | LightingAction;
 
+const sliderSetting = [MandelBulbParamSliderSetting, MandelBoxParamSliderSetting, MengerParamSliderSetting, SierpinskiParamSliderSetting, Julia4DParamSliderSetting] as const;
 const defaultParams = [DefaultMandelBulbSetting, DefaultMandelBoxSetting, DefaultMengerSetting, DefaultSierpinskiSetting, DefaultJulia4DSetting] as const;
-
 const getSetting = (fractal: Fractal): SettingState  => {
     const targetDefaultParams = defaultParams[fractal];
     const {params, juliaEnabled, neon, eps, ray_multiplier} = targetDefaultParams;
@@ -103,17 +119,34 @@ const getSetting = (fractal: Fractal): SettingState  => {
     const front = [-targetDefaultParams.camera[0], -targetDefaultParams.camera[1], -targetDefaultParams.camera[2]] as vec3;
     const julia = targetDefaultParams.julia;
     const color = {...targetDefaultParams.color};
+    const lighting: LightingInterface = {
+        enabled: true,
+        lights: [{
+            pos: camera,
+            color
+        }],
+        shadow: 16.0
+    }
     vec3.normalize(front, front);
-    return {fractal, params, juliaEnabled, julia, camera, front, eps, ray_multiplier, style: {color, neon, decay: 0, fog: 0}};
+    return {fractal, params, juliaEnabled, julia, camera, front, eps, ray_multiplier, style: {color, lighting, neon, shadow: false, decay: 0, orbit_freq: [1.0, 1.0, 1.0]}};
 }
-const samples = [Sample_0, Sample_1];
+const samples = [Sample_0];
 const fromSample = (idx: number): SettingState => {
     const targetSample = samples[idx];
-    const {fractal, params, juliaEnabled, neon, color, decay, fog, eps, ray_multiplier} = targetSample;
+    const {fractal, params, juliaEnabled, shadow, neon, color, decay, eps, ray_multiplier} = targetSample;
     const camera = [targetSample.camera[0], targetSample.camera[1], targetSample.camera[2]] as vec3;
     const front = [targetSample.front[0], targetSample.front[1], targetSample.front[2]] as vec3;
     const julia = targetSample.julia;
-    return {fractal, params, juliaEnabled, julia, camera, front, eps, ray_multiplier, style: {color, neon, decay, fog}};
+    const lighting: LightingInterface = {
+        enabled: true,
+        lights: [{
+            pos: camera,
+            color
+        }],
+        shadow: 16.0
+    }
+    return {fractal, params, juliaEnabled, julia, camera, front, eps, ray_multiplier, 
+        style: {color, lighting, neon, shadow, decay, orbit_freq: [targetSample.orbit_freq[0], targetSample.orbit_freq[1], targetSample.orbit_freq[2]]}};
 }
 
 
@@ -131,11 +164,17 @@ const reducer = (state: SettingState, action: SettingAction): SettingState => {
             newJulia[idx] = value;
             return {...state, julia: newJulia};
         }
+        case '@SET_ORBIT_FREQUENCY': {
+            const {value, idx} = action;
+            state.style.orbit_freq[idx] = value;
+            return {...state, style: {...state.style, orbit_freq: [state.style.orbit_freq[0], state.style.orbit_freq[1], state.style.orbit_freq[2]]}};
+        }
         case '@TOGGLE_JULIA': return {...state, juliaEnabled: action.juliaEnabled}
+        case '@TOGGLE_SHADOW': return {...state, style: {...state.style, shadow: action.shadow}};
         case '@TOGGLE_NEON': return {...state, style: {...state.style, neon: action.neon}};
         case '@SET_COLOR': return {...state, style: {...state.style, color: action.color}};
         case '@SET_DECAY': return {...state, style: {...state.style, decay: action.decay}};
-        case '@SET_FOG': return {...state, style: {...state.style, fog: action.fog}};
+        
         case '@MOVE_CAMERA': {
             const {dir} = action;
             const {fractal, params, juliaEnabled, julia, camera, front} = state;
@@ -200,37 +239,61 @@ const reducer = (state: SettingState, action: SettingAction): SettingState => {
             const {increase} = action;
             return {...state, ray_multiplier: increase ? Math.min(ray_multiplier / 0.9, 1.0) : Math.max(ray_multiplier * 0.9, 0.01)}
         }
+        case '@TOGGLE_LIGHTING': {
+            const newState: SettingState = JSON.parse(JSON.stringify(state));
+            newState.style.lighting.enabled = action.enabled;
+            return newState;
+        }
+        case '@ADD_LIGHT': {
+            const newState: SettingState = JSON.parse(JSON.stringify(state));
+            newState.style.lighting.lights.push({...action});
+            return newState;
+        }
+        case '@DELETE_LIGHT': {
+            const newState: SettingState = JSON.parse(JSON.stringify(state));
+            newState.style.lighting.lights = newState.style.lighting.lights.filter((_, i) => i != action.idx);
+            return newState;
+        }
+        case '@UPDATE_SHADOW': {
+            const newState: SettingState = JSON.parse(JSON.stringify(state));
+            newState.style.lighting.shadow = action.shadow;
+            return newState;
+        }
         case '@SWITCH_FRACTAL': return getSetting(action.fractal);
         case '@RESET': return getSetting(state.fractal);
         case '@FROM_SAMPLE': return fromSample(action.idx);
         case '@FROM_CLIPBOARD': {
-            // const {data} = action;
-            // const {fractal, params, camera, front, juliaEnabled, julia, neon, color, decay, fog, eps, ray_multiplier} = data as ClipBoardData;
-            // if(!Number.isInteger(fractal) || !Array.isArray(params) || !Array.isArray(camera) || camera.length !== 3 || !Array.isArray(front) || front.length !== 3 || 
-            // !Array.isArray(julia) || julia.length !== 3 || typeof juliaEnabled !== 'boolean' || typeof neon !== 'boolean' || typeof eps !== 'number' || typeof ray_multiplier !== 'number' ||
-            // typeof color !== 'object' || typeof color.r !== 'number' || typeof color.g !== 'number' || typeof color.b !== 'number') throw Error('Invalid setting');
-            // if(fractal >= defaultSetting.length || fractal < 0) throw Error('No such fractal');
-            // const targetFractalDefaultSetting = defaultSetting[fractal];
-            // if(params.length !== targetFractalDefaultSetting.params.length) throw Error('Params number not match');
-            // params.forEach((e, i) => {
-            //     if(typeof e !== 'number' || e > targetFractalDefaultSetting.params[i].maxValue || e < targetFractalDefaultSetting.params[i].minValue){
-            //         throw Error('Invalid param value');
-            //     }
-            // });
-            // for(let i=0; i<3; i++){
-            //     if(typeof camera[i] !== 'number') throw Error('Invalid camera position');
-            //     if(typeof front[i] !== 'number') throw Error('Invalid camera direction');
-            //     if(typeof julia[i] !== 'number') throw Error('Invalid julia vector');
-            // };
-            // if(decay < 0) throw Error('Invalid decay coefficient');
-            // if(fog < 0) throw Error('Invalid fog density');
-            // color.r = Math.min(Math.max(color.r, 0), 255);
-            // color.g = Math.min(Math.max(color.g, 0), 255);
-            // color.b = Math.min(Math.max(color.b, 0), 255);
-            // return {fractal, params: targetFractalDefaultSetting.params.map((e, i) => ({...e, value: params[i]})), camera, front, juliaEnabled, julia, neon, color, decay, fog, eps, ray_multiplier};
+            const {data} = action;
+            const {fractal, params, camera, front, juliaEnabled, julia, eps, ray_multiplier, style} = data as ClipBoardData;
+            const {neon, color, decay, orbit_freq} = style;
+            if(!Number.isInteger(fractal) || !Array.isArray(params) || !Array.isArray(camera) || camera.length !== 3 || !Array.isArray(front) || front.length !== 3 || 
+            !Array.isArray(julia) || (julia.length !== 3 && julia.length !== 4) || typeof juliaEnabled !== 'boolean' || typeof neon !== 'boolean' || typeof eps !== 'number' || typeof ray_multiplier !== 'number' ||
+            typeof color !== 'object' || typeof color.r !== 'number' || typeof color.g !== 'number' || typeof color.b !== 'number') throw Error('Invalid setting');
+            if(fractal >= defaultParams.length || fractal < 0) throw Error('No such fractal');
+            const targetFractalSliderSetting = sliderSetting[fractal];
+            if(params.length !== targetFractalSliderSetting.params.length) throw Error('Params number not match');
+            params.forEach((e, i) => {
+                if(typeof e !== 'number' || e > targetFractalSliderSetting.params[i].maxValue || e < targetFractalSliderSetting.params[i].minValue){
+                    throw Error('Invalid param value');
+                }
+            });
+            camera.forEach(v => {
+                if(typeof v !== 'number') throw Error('Invalid camera position');
+            });
+            front.forEach(v => {
+                if(typeof v !== 'number') throw Error('Invalid front direction');
+            });
+            julia.forEach(v => {
+                if(typeof v !== 'number') throw Error('Invalid julia vector');
+            });
+            if(decay < 0) throw Error('Invalid decay coefficient');
+            color.r = Math.min(Math.max(color.r, 0), 255);
+            color.g = Math.min(Math.max(color.g, 0), 255);
+            color.b = Math.min(Math.max(color.b, 0), 255);
+            return {fractal, params, camera, front, juliaEnabled, julia, eps, ray_multiplier, style};
         }
         default: return state;
     }
 }
 
-export const useSettingReducer = () => useReducer(reducer, getSetting(Fractal.MandelBulb));
+export const useSettingReducer = () => useReducer(reducer, fromSample(0)/*getSetting(Fractal.Menger)*/);

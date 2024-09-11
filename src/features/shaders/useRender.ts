@@ -9,10 +9,11 @@ const useRender = (DE: string, param_names: string[], julia_dimension: 3 | 4 = 3
         const front_location = gl.getUniformLocation(program, "front");
         const juliaEnabled_location = gl.getUniformLocation(program, "juliaEnabled");
         const julia_location = gl.getUniformLocation(program, "julia");
+        const shadow_location = gl.getUniformLocation(program, "shadow");
         const neon_location = gl.getUniformLocation(program, "neon");
         const decayCoeff_location = gl.getUniformLocation(program, "decayCoeff");
-        const fogDensity_location = gl.getUniformLocation(program, "fogDensity");
         const palette_seed_location = gl.getUniformLocation(program, "palette_seed");
+        const orbit_freq_location = gl.getUniformLocation(program, "orbit_freq");
         const eps_location = gl.getUniformLocation(program, "eps");
         const ray_multiplier_location = gl.getUniformLocation(program, "ray_multiplier");
         const param_locations = param_names.map(s => gl.getUniformLocation(program, s));
@@ -23,10 +24,11 @@ const useRender = (DE: string, param_names: string[], julia_dimension: 3 | 4 = 3
             gl.uniform3f(front_location, front[0], front[1], front[2]);
             gl.uniform1i(juliaEnabled_location, Number(juliaEnabled));
             
+            gl.uniform1i(shadow_location, Number(style.shadow));
             gl.uniform1i(neon_location, Number(style.neon));
             gl.uniform1f(decayCoeff_location, style.decay);
-            gl.uniform1f(fogDensity_location, style.fog);
             gl.uniform3f(palette_seed_location, style.color.r / 255.0, style.color.g / 255.0, style.color.b / 255.0);
+            gl.uniform3f(orbit_freq_location, style.orbit_freq[0], style.orbit_freq[1], style.orbit_freq[2]);
             gl.uniform1f(eps_location, eps);
             gl.uniform1f(ray_multiplier_location, ray_multiplier);
     

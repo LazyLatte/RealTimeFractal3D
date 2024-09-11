@@ -8,7 +8,7 @@ interface OptionProps {
 const Option: FC<OptionProps> = ({label, children}) => {
     return (
         <Box display="flex" flexDirection="row" justifyContent="flex-start" alignItems="center" >
-            <Typography sx={{margin: "0 12px"}}>{label}</Typography>
+            <Typography>{label}</Typography>
             {children}
         </Box>
     )
