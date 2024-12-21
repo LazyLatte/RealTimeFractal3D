@@ -296,4 +296,4 @@ const reducer = (state: SettingState, action: SettingAction): SettingState => {
     }
 }
 
-export const useSettingReducer = () => useReducer(reducer, fromSample(0)/*getSetting(Fractal.Menger)*/);
+export const useSettingReducer = () => useReducer(reducer, /*fromSample(0)*/getSetting(Fractal.Sierpinski));

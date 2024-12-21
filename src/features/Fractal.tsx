@@ -4,7 +4,7 @@ import StateDisplay from './state-display';
 import Save from './save';
 import Setting, {useSettingReducer} from './setting';
 import { initGL, toggleShader} from './shaders';
-
+import Lighting from './setting/advanced/lighting';
 const Fractal = () => {
   const gl = useMemo(() => initGL(), []);
   const fractalRef = useRef<HTMLDivElement>(null);

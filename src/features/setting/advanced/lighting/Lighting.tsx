@@ -8,6 +8,7 @@ import ListItem from '@mui/material/ListItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
+import SquareRoundedIcon from '@mui/icons-material/SquareRounded';
 import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -53,7 +54,7 @@ const Lighting = forwardRef<LightingHandle, LightingProps>(({setting, dispatch},
                 <Divider sx={{margin: '4px 0', border: '1px solid black'}}/>
                 <List sx={{borderRadius: 2, backgroundColor: 'white', padding: '6px 6px 0px'}}>
                     <ListItem>
-                        <Button variant="outlined" onClick={() => setModalOpen(true)} >Add light</Button>
+                        <Button variant="outlined" onClick={() => setModalOpen(true)}>Add light</Button>
                     </ListItem>
                     {lights.map((lt, i) => (
                         <ListItem 
@@ -63,10 +64,33 @@ const Lighting = forwardRef<LightingHandle, LightingProps>(({setting, dispatch},
                                     <DeleteIcon />
                                 </IconButton>
                             }
-                            sx={{border: '1px solid', borderRadius: 2, margin: '6px 0px'}}
+                            sx={{border: '2px solid #777', borderRadius: 2, margin: '6px 0'}}
+                            disablePadding
+                            dense
                         >
-                            <ListItemText secondary={`(${lt.pos[0].toFixed(5)}, ${lt.pos[1].toFixed(5)}, ${lt.pos[2].toFixed(5)})`} />
-                            <Box sx={{border: '2px solid', borderRadius: 2, width: 25, height: 25, backgroundColor: `rgb(${lt.color.r}, ${lt.color.g}, ${lt.color.b})`}}/>
+                            <ListItemButton disableRipple>
+                                <ListItemIcon sx={{minWidth: 0}}>
+                                    <Checkbox
+                                        edge="start"
+                                        checked={true}
+                                        tabIndex={-1}
+                                        disableRipple
+                                    />
+                                </ListItemIcon>
+                                <ListItemIcon sx={{minWidth: 40}}>
+                                    <SquareRoundedIcon 
+                                        sx={{
+                                            color: `rgb(${lt.color.r}, ${lt.color.g}, ${lt.color.b})`,
+                                            backgroundColor: '#444',
+                                            borderRadius: 1
+                                        }}
+                                    />
+                                </ListItemIcon>
+                                <ListItemText secondary={`(${lt.pos[0].toFixed(2)}..., ${lt.pos[1].toFixed(2)}..., ${lt.pos[2].toFixed(2)}...)`} />
+                            </ListItemButton>
+
+
+                            
                         </ListItem>
                     ))}
                     <ListItem>
